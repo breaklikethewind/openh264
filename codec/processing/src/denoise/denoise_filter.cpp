@@ -40,6 +40,10 @@
 
 WELSVP_NAMESPACE_BEGIN
 
+// RTI Change
+#ifdef _WIN32_WCE
+#pragma warning( disable : 4244 )
+#endif
 void	BilateralLumaFilter8_c (uint8_t* pSample, int32_t iStride) {
   int32_t nSum = 0, nTotWeight = 0;
   int32_t iCenterSample = *pSample;

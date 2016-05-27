@@ -56,7 +56,6 @@
 #endif//MAX_TRACE_LOG_SIZE
 
 #define STATISTICS_LOG_INTERVAL_MS (5000) // output statistics log every 5s
-
 /* MB width in pixels for specified colorspace I420 usually used in codec */
 #define MB_WIDTH_LUMA		16
 #define MB_WIDTH_CHROMA		(MB_WIDTH_LUMA>>1)
@@ -190,7 +189,6 @@ BLOCK_4x4   = 4,
 //    BLOCK_4x8   = 6,
 BLOCK_SIZE_ALL = 5
 };
-
 typedef enum {
 RECIEVE_UNKOWN = 0,
 RECIEVE_SUCCESS = 1,

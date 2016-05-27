@@ -15,13 +15,12 @@ class BaseEncoderTest {
   void SetUp();
   void TearDown();
   void EncodeFile (const char* fileName, EUsageType usageType, int width, int height, float frameRate,
-                   SliceModeEnum slices, bool denoise, int layers, bool losslessLink, bool enableLtr, Callback* cbk);
+                   SliceModeEnum slices, bool denoise, int layers, Callback* cbk);
   void EncodeStream (InputStream* in, EUsageType usageType, int width, int height, float frameRate, SliceModeEnum slices,
-                     bool denoise, int layers, bool losslessLink, bool enableLtr, Callback* cbk);
+                     bool denoise, int layers, Callback* cbk);
 
-  ISVCEncoder* encoder_;
  private:
-
+  ISVCEncoder* encoder_;
 };
 
 #endif //__BASEENCODERTEST_H__

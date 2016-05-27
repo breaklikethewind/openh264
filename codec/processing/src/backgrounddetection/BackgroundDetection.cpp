@@ -310,6 +310,10 @@ inline void CBackgroundDetection::BackgroundErosion (SBackgroundOU* pBackgroundO
   }
 }
 
+// RTI Change
+#ifdef _WIN32_WCE
+#pragma warning( disable : 4244 )
+#endif
 inline void CBackgroundDetection::SetBackgroundMbFlag (int8_t* pBackgroundMbFlag, int32_t iPicWidthInMb,
     int32_t iBackgroundMbFlag) {
   *pBackgroundMbFlag = iBackgroundMbFlag;

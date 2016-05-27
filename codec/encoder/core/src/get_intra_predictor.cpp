@@ -183,6 +183,11 @@ void WelsI4x4LumaPredDDLTop_c (uint8_t* pPred, uint8_t* pRef, const int32_t kiSt
 
 
 /*down right*/
+
+// RTI Change
+#ifdef _WIN32_WCE
+#pragma warning( disable : 4244 )
+#endif
 void WelsI4x4LumaPredDDR_c (uint8_t* pPred, uint8_t* pRef, const int32_t kiStride) {
   const int32_t kiStridex2	= kiStride << 1;
   const int32_t kiStridex3	= kiStride + kiStridex2;
@@ -537,6 +542,7 @@ void WelsIChromaPredDcNA_c (uint8_t* pPred, uint8_t* pRef, const int32_t kiStrid
   ST64 (pPred + 48, kuiDcValue64);
   ST64 (pPred + 56, kuiDcValue64);
 }
+
 
 
 void WelsI16x16LumaPredPlane_c (uint8_t* pPred, uint8_t* pRef, const int32_t kiStride) {

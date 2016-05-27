@@ -62,6 +62,10 @@ int32_t GetLTRFrameIndex (PRefPic pRefPic, int32_t iAncLTRFrameNum);
 #endif
 static int32_t RemainOneBufferInDpbForEC (PWelsDecoderContext pCtx);
 
+// RTI Change
+#ifdef _WIN32_WCE
+#pragma warning( disable : 4245 )
+#endif
 static void SetUnRef (PPicture pRef) {
   if (NULL != pRef) {
     pRef->bUsedAsRef = false;
@@ -108,6 +112,11 @@ void WelsResetRefPic (PWelsDecoderContext pCtx) {
 /**
  * fills the pRefPic.pRefList.
  */
+
+// RTI Change
+#ifdef _WIN32_WCE
+#pragma warning( disable : 4244 )
+#endif
 int32_t WelsInitRefList (PWelsDecoderContext pCtx, int32_t iPoc) {
   int32_t i, iCount = 0;
 
@@ -397,6 +406,10 @@ static int32_t MMCOProcess (PWelsDecoderContext pCtx, uint32_t uiMmcoType,
   return iRet;
 }
 
+// RTI Change
+#ifdef _WIN32_WCE
+#pragma warning( disable : 4702 )
+#endif
 static int32_t SlidingWindow (PWelsDecoderContext pCtx) {
   PRefPic pRefPic = &pCtx->sRefPic;
   PPicture pPic = NULL;

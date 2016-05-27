@@ -42,6 +42,11 @@
 #include "ls_defines.h"
 namespace WelsEnc {
 //basic pMv prediction unit for pMv width (4, 2, 1)
+
+// RTI Change
+#ifdef _WIN32_WCE
+#pragma warning( disable : 4244 )
+#endif
 void PredMv (const SMVComponentUnit* kpMvComp, int8_t iPartIdx, int8_t iPartW, int32_t iRef, SMVUnitXY* sMvp) {
   const uint8_t kuiLeftIdx		= g_kuiCache30ScanIdx[iPartIdx] - 1;
   const uint8_t kuiTopIdx		= g_kuiCache30ScanIdx[iPartIdx] - 6;

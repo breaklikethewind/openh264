@@ -77,6 +77,11 @@ void WelsIHadamard4x4Dc (int16_t* pRes) { //pBuffer size : 4x4
 }
 
 /* for qp < 12 */
+
+// RTI Change
+#ifdef _WIN32_WCE
+#pragma warning( disable : 4244 )
+#endif
 void WelsDequantLumaDc4x4 (int16_t* pRes, const int32_t kiQp) {
   int32_t i	= 15;
   const uint16_t kuiDequantValue	= g_kuiDequantCoeff[kiQp % 6][0];

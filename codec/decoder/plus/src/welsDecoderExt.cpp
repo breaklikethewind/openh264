@@ -65,7 +65,12 @@ extern "C" {
 #include <windows.h>
 #include <stdio.h>
 #include <stdarg.h>
+
+// RTI Change
+#ifndef _WIN32_WCE
 #include <sys/types.h>
+#include <sys/timeb.h>
+#endif
 #else
 #include <sys/time.h>
 #endif
@@ -241,6 +246,7 @@ int32_t CWelsDecoder::InitDecoder (void) {
     return cmMallocMemeError;
 
   return WelsInitDecoder (m_pDecContext, &m_pWelsTrace->m_sLogCtx);
+
 }
 
 /*
@@ -279,7 +285,6 @@ long CWelsDecoder::SetOption (DECODER_OPTION eOptID, void* pOption) {
     InitErrorCon (m_pDecContext);
     WelsLog (&m_pWelsTrace->m_sLogCtx, WELS_LOG_INFO,
              "CWelsDecoder::SetOption for ERROR_CON_IDC = %d.", iVal);
-
     return cmResultSuccess;
   } else if (eOptID == DECODER_OPTION_TRACE_LEVEL) {
     if (m_pWelsTrace) {
@@ -453,7 +458,6 @@ DECODING_STATE CWelsDecoder::DecodeParser (const unsigned char* kpSrc,
 //TODO, add function here
   return (DECODING_STATE) m_pDecContext->iErrorCode;
 }
-
 DECODING_STATE CWelsDecoder::DecodeFrame (const unsigned char* kpSrc,
     const int kiSrcLen,
     unsigned char** ppDst,

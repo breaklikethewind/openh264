@@ -65,7 +65,6 @@ welsCodecTrace::~welsCodecTrace() {
 }
 
 
-
 void welsCodecTrace::StaticCodecTrace (void* pCtx, const int32_t iLevel, const char* Str_Format, va_list vl) {
   welsCodecTrace* self = (welsCodecTrace*) pCtx;
   self->CodecTrace (iLevel, Str_Format, vl);
@@ -78,6 +77,7 @@ void welsCodecTrace::CodecTrace (const int32_t iLevel, const char* Str_Format, v
 
   char pBuf[MAX_LOG_SIZE] = {0};
   WelsVsnprintf (pBuf, MAX_LOG_SIZE, Str_Format, vl);	// confirmed_safe_unsafe_usage
+
   if (m_fpTrace) {
     m_fpTrace (m_pTraceCtx, iLevel, pBuf);
   }

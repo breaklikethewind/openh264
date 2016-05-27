@@ -335,6 +335,10 @@ void VAACalcSad_c (const uint8_t* pCurData, const uint8_t* pRefData, int32_t iPi
   }
 }
 
+// RTI Change
+#ifdef _WIN32_WCE
+#pragma warning( disable : 4244 )
+#endif
 void VAACalcSadSsdBgd_c (const uint8_t* pCurData, const uint8_t* pRefData, int32_t iPicWidth, int32_t iPicHeight,
                          int32_t iPicStride,
                          int32_t* pFrameSad, int32_t* pSad8x8, int32_t* pSum16x16, int32_t* psqsum16x16, int32_t* psqdiff16x16, int32_t* pSd8x8,

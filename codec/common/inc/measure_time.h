@@ -47,6 +47,14 @@
 #include <sys/time.h>
 #else
 #include <windows.h>
+
+// RTI Change
+#ifdef _WIN32_WCE
+#include <winbase.h>
+#else
+#include <sys/timeb.h>
+#endif // _WIN32_WCE
+
 #endif
 #include <time.h>
 

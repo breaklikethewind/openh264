@@ -28,7 +28,6 @@ JNIEXPORT void JNICALL Java_com_wels_enc_WelsEncTest_DoEncoderAutoTest
   EncMain(sizeof(argv)/sizeof(argv[0]),(char**)&argv[0]);
   LOGI ("End to run JNI module!+++");
 }
-
 JNIEXPORT void JNICALL Java_com_wels_enc_WelsEncTest_DoEncoderTest
 (JNIEnv* env, jobject thiz, jstring jsFileNameIn) {
   /**************** Add the native codes/API *****************/

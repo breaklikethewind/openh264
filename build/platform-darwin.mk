@@ -1,4 +1,4 @@
-include $(SRC_PATH)build/arch.mk
+include build/platform-arch.mk
 SHAREDLIBSUFFIX = dylib
 SHARED = -dynamiclib
 CFLAGS += -Wall -fPIC -MMD -MP

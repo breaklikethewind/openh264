@@ -202,8 +202,6 @@ WELS_THREAD_ERROR_CODE WelsThreadSetName (const char* thread_name) {
   // do nothing
   return WELS_THREAD_ERROR_OK;
 }
-
-
 WELS_THREAD_ERROR_CODE    WelsThreadJoin (WELS_THREAD_HANDLE  thread) {
   WaitForSingleObject (thread, INFINITE);
   CloseHandle (thread);

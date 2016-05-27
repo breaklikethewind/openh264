@@ -39,6 +39,11 @@ namespace WelsDec {
 
 //NOTE::: p_RS should NOT be modified and it will lead to mismatch with JSVM.
 //        so should allocate kA array to store the temporary value (idct).
+
+// RTI Change
+#ifdef _WIN32_WCE
+#pragma warning( disable : 4244 )
+#endif
 void IdctResAddPred_c (uint8_t* pPred, const int32_t kiStride, int16_t* pRs) {
   int16_t iSrc[16];
 

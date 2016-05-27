@@ -43,6 +43,11 @@
 #include "mb_cache.h"
 
 namespace WelsDec {
+
+// RTI Change
+#ifdef _WIN32_WCE
+#pragma warning( disable : 4244 4701 )
+#endif
 void PredPSkipMvFromNeighbor (PDqLayer pCurLayer, int16_t iMvp[2]) {
   bool bTopAvail, bLeftTopAvail, bRightTopAvail, bLeftAvail;
 

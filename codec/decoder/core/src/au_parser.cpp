@@ -142,6 +142,7 @@ uint8_t* ParseNalHeader (PWelsDecoderContext pCtx, SNalUnitHeader* pNalUnitHeade
   --iNalSize;
   ++ (*pConsumedBytes);
 
+
   if (! (IS_SEI_NAL (pNalUnitHeader->eNalUnitType) || IS_SPS_NAL (pNalUnitHeader->eNalUnitType)
          || pCtx->bSpsExistAheadFlag)) {
     if (pCtx->bPrintFrameErrorTraceFlag) {
@@ -187,6 +188,7 @@ uint8_t* ParseNalHeader (PWelsDecoderContext pCtx, SNalUnitHeader* pNalUnitHeade
     pCurNal = &pCtx->sPrefixNal;
 
     if (iNalSize < NAL_UNIT_HEADER_EXT_SIZE) {
+
       PAccessUnit pCurAu	   = pCtx->pAccessUnitList;
       uint32_t uiAvailNalNum = pCurAu->uiAvailUnitsNum;
 
@@ -260,6 +262,7 @@ uint8_t* ParseNalHeader (PWelsDecoderContext pCtx, SNalUnitHeader* pNalUnitHeade
 
     if (pNalUnitHeader->eNalUnitType == NAL_UNIT_CODED_SLICE_EXT) {
       if (iNalSize < NAL_UNIT_HEADER_EXT_SIZE) {
+
         ForceClearCurrentNal (pCurAu);
 
         if (uiAvailNalNum > 1) {
@@ -616,7 +619,10 @@ int32_t ParsePrefixNalUnit (PWelsDecoderContext pCtx, PBitStringAux pBs) {
 
 
 
-
+// RTI Change
+#ifdef _WIN32_WCE
+#pragma warning( disable : 4244 )
+#endif
 int32_t DecodeSpsSvcExt (PWelsDecoderContext pCtx, PSubsetSps pSpsExt, PBitStringAux pBs) {
   PSpsSvcExt  pExt			= NULL;
   uint32_t uiCode;
@@ -688,6 +694,10 @@ int32_t DecodeSpsSvcExt (PWelsDecoderContext pCtx, PSubsetSps pSpsExt, PBitStrin
   return 0;
 }
 
+// RTI Change
+#ifdef _WIN32_WCE
+#pragma warning( disable : 4702 )
+#endif
 const SLevelLimits* GetLevelLimits (int32_t iLevelIdx, bool bConstraint3) {
   switch (iLevelIdx) {
   case 10:

@@ -327,7 +327,6 @@
 			targetProxy = 541044A8199888F800B44931 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
-
 /* Begin PBXVariantGroup section */
 		F0E663521810EFA5000C888E /* InfoPlist.strings */ = {
 			isa = PBXVariantGroup;

@@ -193,6 +193,11 @@ static inline void McHorVer02WidthEq16_c (const uint8_t* pSrc, int32_t iSrcStrid
   }
 }
 //horizontal and vertical filter to gain half sample, that is (2, 2) location in quarter sample
+
+// RTI Change
+#ifdef _WIN32_WCE
+#pragma warning( disable : 4244 )
+#endif
 static inline void McHorVer22WidthEq16_c (const uint8_t* pSrc, int32_t iSrcStride, uint8_t* pDst, int32_t iDstStride,
     int32_t iHeight) {
   int16_t pTmp[16 + 5] = {0}; //16

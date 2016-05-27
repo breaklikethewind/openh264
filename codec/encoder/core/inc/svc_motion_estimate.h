@@ -248,7 +248,6 @@ void SumOf8x8BlockOfFrame_c (uint8_t* pRefPicture, const int32_t kiWidth, const 
 void SumOf16x16BlockOfFrame_c (uint8_t* pRefPicture, const int32_t kiWidth, const int32_t kiHeight,
                                const int32_t kiRefStride,
                                uint16_t* pFeatureOfBlock, uint32_t pTimesOfFeatureValue[]);
-
 #ifdef X86_ASM
 extern "C"
 {

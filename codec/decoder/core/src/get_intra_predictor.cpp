@@ -151,6 +151,11 @@ void WelsI4x4LumaPredDDL_c (uint8_t* pPred, const int32_t kiStride) {
 }
 
 /*down pLeft*/
+
+// RTI Change
+#ifdef _WIN32_WCE
+#pragma warning( disable : 4244 )
+#endif
 void WelsI4x4LumaPredDDLTop_c (uint8_t* pPred, const int32_t kiStride) {
   const int32_t kiStride2	= kiStride << 1;
   const int32_t kiStride3	= kiStride + kiStride2;

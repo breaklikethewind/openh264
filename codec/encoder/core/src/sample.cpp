@@ -40,6 +40,7 @@
 
 #include "sample.h"
 #include "sad_common.h"
+
 #include "intra_pred_common.h"
 #include "mc.h"
 #include "cpu_core.h"

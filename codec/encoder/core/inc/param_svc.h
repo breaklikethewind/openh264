@@ -278,6 +278,10 @@ typedef struct TagWelsSvcCodingParam: SEncParamExt {
     pCodingParam->iRCMode        = iRCMode;
     pCodingParam->fMaxFrameRate  = fMaxFrameRate;
   }
+// RTI Change
+#ifdef _WIN32_WCE
+#pragma warning( disable : 4244 )
+#endif
   int32_t ParamTranscode (const SEncParamExt& pCodingParam) {
     float fParamMaxFrameRate		= WELS_CLIP3 (pCodingParam.fMaxFrameRate, MIN_FRAME_RATE, MAX_FRAME_RATE);
 

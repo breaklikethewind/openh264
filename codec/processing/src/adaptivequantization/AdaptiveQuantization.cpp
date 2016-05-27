@@ -54,6 +54,10 @@ CAdaptiveQuantization::CAdaptiveQuantization (int32_t iCpuFlag) {
 CAdaptiveQuantization::~CAdaptiveQuantization() {
 }
 
+// RTI Change
+#ifdef _WIN32_WCE
+#pragma warning( disable : 4244 )
+#endif
 EResult CAdaptiveQuantization::Process (int32_t iType, SPixMap* pSrcPixMap, SPixMap* pRefPixMap) {
   EResult eReturn = RET_INVALIDPARAM;
 

@@ -899,11 +899,11 @@ void WelsMarkPicScreen (void* pEncCtx) {
 
       pRefPicMark->SMmcoRef[pRefPicMark->uiMmcoCount].iLongTermFrameIdx = pLtr->iCurLtrIdx;
       pRefPicMark->SMmcoRef[pRefPicMark->uiMmcoCount++].iMmcoType = MMCO_LONG;
+
     }
   }
   return;
 }
-
 void DoNothing (void* pointer) {
 }
 

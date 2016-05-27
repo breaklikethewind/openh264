@@ -66,6 +66,11 @@ int32_t AssignMbMapSingleSlice (void* pMbMap, const int32_t kiCountMbNum, const 
  *
  * \return	0 - successful; none 0 - failed
  */
+
+// RTI Change
+#ifdef _WIN32_WCE
+#pragma warning( disable : 4244 )
+#endif
 int32_t AssignMbMapMultipleSlices (SSliceCtx* pSliceSeg, const SSliceConfig* kpMso) {
   if (NULL == pSliceSeg || SM_SINGLE_SLICE == pSliceSeg->uiSliceMode)
     return 1;
@@ -218,6 +223,11 @@ bool CheckRasterMultiSliceSetting (const int32_t kiMbNumInFrame, SSliceArgument*
 
 
 // GOM based RC related for uiSliceNum decision, only used at SM_FIXEDSLCNUM_SLICE
+
+// RTI Change
+#ifdef _WIN32_WCE
+#pragma warning( disable : 4127 )
+#endif
 void GomValidCheckSliceNum (const int32_t kiMbWidth, const int32_t kiMbHeight, uint32_t* pSliceNum) {
   const int32_t kiCountNumMb	= kiMbWidth * kiMbHeight;
   int32_t iSliceNum			= *pSliceNum;
@@ -309,6 +319,11 @@ void GomValidCheckSliceMbNum (const int32_t kiMbWidth, const int32_t kiMbHeight,
  *	Get slice count for multiple slice segment
  *
  */
+
+// RTI Change
+#ifdef _WIN32_WCE
+#pragma warning( disable : 4702 )
+#endif
 int32_t GetInitialSliceNum (const int32_t kiMbWidth, const int32_t kiMbHeight, SSliceConfig* pMso) {
   if (NULL == pMso)
     return -1;

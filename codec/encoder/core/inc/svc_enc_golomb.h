@@ -139,7 +139,10 @@ return 0;
 }
 
 
-
+// RTI Change
+#ifdef _WIN32_WCE
+#pragma warning( disable : 4244 4127 )
+#endif
 static inline int32_t BsWriteBits (SBitStringAux* pBs, int32_t n, const uint32_t kuiValue) {
 if (n < pBs->iLeftBits) {
   pBs->uiCurBits = (pBs->uiCurBits << n) | kuiValue;

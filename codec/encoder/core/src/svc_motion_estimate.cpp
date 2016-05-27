@@ -340,7 +340,6 @@ void WelsDiamondSearch (SWelsFuncPtrList* pFuncList, SWelsME* pMe, SSlice* pSlic
 
   const SMVUnitXY ksMvStartMin    = pSlice->sMvStartMin;
   const SMVUnitXY ksMvStartMax    = pSlice->sMvStartMax;
-
   int32_t iMvDx = ((pMe->sMv.iMvX) << 2) - pMe->sMvp.iMvX;
   int32_t iMvDy = ((pMe->sMv.iMvY) << 2) - pMe->sMvp.iMvY;
 
@@ -437,8 +436,6 @@ void VerticalFullSearchUsingSSE41 (SWelsFuncPtrList* pFuncList, SWelsME* pMe,
   int32_t iFixedMvd = * (pMvdTable - pMe->sMvp.iMvX);
   uint16_t* pMvdCost  = & (pMvdTable[ (kiMinMv << 2) - pMe->sMvp.iMvY]);
   int16_t iStartMv = 0;
-
-
   const int32_t kIsBlock16x16 = pMe->uiBlockSize == BLOCK_16x16;
   const int32_t kiEdgeBlocks = kIsBlock16x16 ? 16 : 8;
   PSampleSadHor8Func pSampleSadHor8 = pFuncList->pfSampleSadHor8[kIsBlock16x16];
@@ -510,7 +507,6 @@ void HorizontalFullSearchUsingSSE41 (SWelsFuncPtrList* pFuncList, SWelsME* pMe,
                                      const int16_t kiMinMv, const int16_t kiMaxMv,
                                      const bool bVerticalSearch) {
   uint8_t* kpEncMb = pMe->pEncMb;
-
   const int32_t iCurMeBlockPixX = pMe->iCurMeBlockPixX;
   int32_t iMinPos = iCurMeBlockPixX + kiMinMv;
   int32_t iMaxPos = iCurMeBlockPixX + kiMaxMv;
@@ -621,6 +617,7 @@ void WelsMotionCrossSearch (SWelsFuncPtrList* pFuncList, SWelsME* pMe, SSlice* p
   PLineFullSearchFunc pfVerticalFullSearchFunc = pFuncList->pfVerticalFullSearch;
   PLineFullSearchFunc pfHorizontalFullSearchFunc = pFuncList->pfHorizontalFullSearch;
 
+
   //vertical search
   pfVerticalFullSearchFunc (pFuncList, pMe,
                             pMe->pMvdCost,
@@ -638,7 +635,6 @@ void WelsMotionCrossSearch (SWelsFuncPtrList* pFuncList, SWelsME* pMe, SSlice* p
                                 false);
   }
 }
-
 
 /////////////////////////
 // Feature Search Basics
@@ -745,7 +741,6 @@ int32_t ReleaseScreenBlockFeatureStorage (CMemoryAlign* pMa, SScreenBlockFeature
                      "pScreenBlockFeatureStorage->pFeatureValuePointerList");
       pScreenBlockFeatureStorage->pFeatureValuePointerList = NULL;
     }
-
     return ENC_RETURN_SUCCESS;
   }
   return ENC_RETURN_UNEXPECTED;

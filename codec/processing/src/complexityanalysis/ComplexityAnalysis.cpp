@@ -37,6 +37,7 @@
 
 WELSVP_NAMESPACE_BEGIN
 
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 CComplexityAnalysis::CComplexityAnalysis (int32_t iCpuFlag) {
@@ -168,6 +169,10 @@ void GomSampleSadExceptBackground (uint32_t* pGomSad, int32_t* pGomForegroundBlo
   }
 }
 
+// RTI Change
+#ifdef _WIN32_WCE
+#pragma warning( disable : 4244 )
+#endif
 void CComplexityAnalysis::AnalyzeGomComplexityViaSad (SPixMap* pSrcPixMap, SPixMap* pRefPixMap) {
   int32_t iWidth     = pSrcPixMap->sRect.iRectWidth;
   int32_t iHeight    = pSrcPixMap->sRect.iRectHeight;
@@ -282,10 +287,8 @@ CComplexityAnalysisScreen::CComplexityAnalysisScreen (int32_t iCpuFlag) {
     m_pSadFunc = WelsSampleSad16x16_sse2;
     m_pIntraFunc[0] = WelsI16x16LumaPredV_sse2;
     m_pIntraFunc[1] = WelsI16x16LumaPredH_sse2;
-
   }
 #endif
-
 #if defined (HAVE_NEON)
   if (iCpuFlag & WELS_CPU_NEON) {
     m_pSadFunc = WelsSampleSad16x16_neon;
@@ -302,7 +305,6 @@ CComplexityAnalysisScreen::CComplexityAnalysisScreen (int32_t iCpuFlag) {
     m_pIntraFunc[1] = WelsI16x16LumaPredH_AArch64_neon;
   }
 #endif
-
 }
 
 CComplexityAnalysisScreen::~CComplexityAnalysisScreen() {

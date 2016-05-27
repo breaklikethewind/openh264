@@ -44,13 +44,19 @@
 #include <time.h>
 #if defined(_WIN32)
 #include <windows.h>
+
+// RTI Change
+#ifndef _WIN32_WCE
 #include <sys/types.h>
 #include <sys/timeb.h>
+#endif
+
 #ifndef _MSC_VER
 #include <sys/time.h>
 #endif //!_MSC_VER
 #else
 #include <sys/time.h>
+#include <sys/timeb.h>
 #endif //_WIN32
 
 #include "macros.h"
@@ -66,7 +72,15 @@ int32_t WelsSnprintf (char* pBuffer,  int32_t iSizeOfBuffer, const char* kpForma
 
   va_start (pArgPtr, kpFormat);
 
+// RTI Change
+#ifdef _WIN32_WCE
+  // (WinCE)  int _vsnprintf(char *buffer, size_t count, const char * format, va_list argptr );
+  // (!WinCE) int vsnprintf_s(char *buffer, size_t sizeOfBuffer, size_t count, const char *format, va_list argptr );
+  iRc = _vsnprintf(pBuffer, _TRUNCATE, kpFormat, pArgPtr);
+#else
+#error re-introduce lost change
   iRc = vsnprintf_s (pBuffer, iSizeOfBuffer, _TRUNCATE, kpFormat, pArgPtr);
+#endif
   if (iRc < 0)
     iRc = iSizeOfBuffer;
 
@@ -82,7 +96,15 @@ char* WelsStrncpy (char* pDest, int32_t iSizeInBytes, const char* kpSrc) {
 }
 
 int32_t WelsVsnprintf (char* pBuffer, int32_t iSizeOfBuffer, const char* kpFormat, va_list pArgPtr) {
+
+// RTI Change
+#ifdef _WIN32_WCE
+  // (WinCE)  int _vsnprintf(char *buffer, size_t count, const char * format, va_list argptr );
+  // (!WinCE) int vsnprintf_s(char *buffer, size_t sizeOfBuffer, size_t count, const char *format, va_list argptr );
+  int32_t iRc = _vsnprintf(pBuffer, _TRUNCATE, kpFormat, pArgPtr);
+#else
   int32_t iRc = vsnprintf_s (pBuffer, iSizeOfBuffer, _TRUNCATE, kpFormat, pArgPtr);
+#endif
   if (iRc < 0)
     iRc = iSizeOfBuffer;
   return iRc;
@@ -102,10 +124,72 @@ int32_t WelsFclose (WelsFileHandle* pFp) {
 }
 
 int32_t WelsGetTimeOfDay (SWelsTime* pTp) {
+
+// RTI Change
+#ifdef OUTPUT_BIT_STREAM
+#ifdef _WIN32_WCE
+	// (wince) void GetSystemTime( LPSYSTEMTIME lpSystemTime );
+	// (!wince) errno_t _ftime_s( struct _timeb *timeptr );
+#if 0
+	typedef struct _SYSTEMTIME { 
+	  WORD wYear;         // Specifies the current year
+	  WORD wMonth;        // Specifies the current month; January = 1, February = 2, and so on
+	  WORD wDayOfWeek;    // Specifies the current day of the week; Sunday = 0, Monday = 1, and so on
+	  WORD wDay;          // Specifies the current day of the month
+	  WORD wHour;         // Specifies the current hour
+	  WORD wMinute;       // Specifies the current minute
+	  WORD wSecond;       // Specifies the current second
+	  WORD wMilliseconds; // Specifies the current millisecond
+	} SYSTEMTIME;
+
+	struct timeb
+  {
+    time_t time;		        /* The number of seconds since the start of the Unix epoch: midnight UTC of January 1, 1970*/
+    unsigned short int millitm;	/* Additional milliseconds.  */
+    short int timezone;		    /* Minutes west of GMT.  */
+    short int dstflag;		    /* Nonzero if Daylight Savings Time used.  */
+  };
+#endif
+	LPSYSTEMTIME systime;
+	DWORD yeardays;
+
+	yeardays = 0;                             // Compute number of days this year
+	if (systime->wMonth > 1) yeardays += 31;  // # Days in January
+	if (systime->wMonth > 2) yeardays += (systime->wYear % 4) ? 28:29;  // # Days in Febuary (w/leap year)
+	if (systime->wMonth > 3) yeardays += 31;  // # Days in March
+	if (systime->wMonth > 4) yeardays += 30;  // # Days in April
+	if (systime->wMonth > 5) yeardays += 31;  // # Days in May
+	if (systime->wMonth > 6) yeardays += 30;  // # Days in June
+	if (systime->wMonth > 7) yeardays += 31;  // # Days in July
+	if (systime->wMonth > 8) yeardays += 31;  // # Days in August
+	if (systime->wMonth > 9) yeardays += 30;  // # Days in September
+	if (systime->wMonth > 10) yeardays += 31;  // # Days in October
+	if (systime->wMonth > 11) yeardays += 30; // # Days in November
+// Never B true:	if (systime->wMonth > 12) yeardays += 31; // # Days in December
+
+	GetSystemTime( systime );
+    pTp->time = ((systime->wYear - 1970) * 31536000) + // Year seconds
+		        ((systime->wDay + yeardays) * 86400) + // Day seconds
+				((systime->wHour) * 360) +              // Hour seconds
+				((systime->wMinute) * 60) +             // Minute seconds
+				systime->wSecond;                       // seconds
+	pTp->millitm = systime->wMilliseconds;
+	pTp->timezone = 0; // unknown
+	pTp->dstflag = 0;  // unknown
+	return 0;
+#else
   return _ftime_s (pTp);
+#endif
+
+#else
+  return 0;
+#endif // #ifdef OUTPUT_BIT_STREAM
 }
 
 int32_t WelsStrftime (char* pBuffer, int32_t iSize, const char* kpFormat, const SWelsTime* kpTp) {
+
+// RTI Change
+#ifdef OUTPUT_BIT_STREAM
   struct tm   sTimeNow;
   int32_t iRc;
 
@@ -115,6 +199,9 @@ int32_t WelsStrftime (char* pBuffer, int32_t iSize, const char* kpFormat, const 
   if (iRc == 0)
     pBuffer[0] = '\0';
   return iRc;
+#else
+  return 0;
+#endif
 }
 
 #else

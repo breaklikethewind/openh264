@@ -587,6 +587,7 @@ int FillSpecificParameters (SEncParamExt& sParam) {
   sParam.uiIntraPeriod		= 320;		// period of Intra frame
   sParam.bEnableSpsPpsIdAddition = 1;
   sParam.bPrefixNalAddingCtrl = 0;
+
   sParam.iComplexityMode = MEDIUM_COMPLEXITY;
   int iIndexLayer = 0;
   sParam.sSpatialLayers[iIndexLayer].uiProfileIdc	= PRO_BASELINE;
@@ -810,6 +811,7 @@ int ProcessEncoding (ISVCEncoder* pPtrEnc, int argc, char** argv, bool bConfigFi
     pSrcPic->uiTimeStamp = WELS_ROUND (iFrameIdx * (1000 / sSvcParam.fMaxFrameRate));
     int iEncFrames = pPtrEnc->EncodeFrame (pSrcPic, &sFbi);
     iTotal += WelsTime() - iStart;
+
     ++ iFrameIdx;
     if (videoFrameTypeSkip == sFbi.eFrameType) {
       continue;

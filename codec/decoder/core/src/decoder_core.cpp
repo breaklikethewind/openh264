@@ -168,6 +168,11 @@ inline int32_t  WelsDecodeConstructSlice (PWelsDecoderContext pCtx, PNalUnit pCu
 /*
  *	Predeclared function routines ..
  */
+
+// RTI Change
+#ifdef _WIN32_WCE
+#pragma warning( disable : 4244 )
+#endif
 int32_t ParseRefPicListReordering (PBitStringAux pBs, PSliceHeader pSh) {
   int32_t iList = 0;
   const EWelsSliceType keSt = pSh->eSliceType;
@@ -1792,7 +1797,6 @@ int32_t DecodeCurrentAccessUnit (PWelsDecoderContext pCtx, uint8_t** ppDst, SBuf
   int32_t iRet = ERR_NONE;
 
   bool bAllRefComplete = true; // Assume default all ref picutres are complete
-
   const uint8_t kuiTargetLayerDqId = GetTargetDqId (pCtx->uiTargetDqId, pCtx->pParam);
   const uint8_t kuiDependencyIdMax = (kuiTargetLayerDqId & 0x7F) >> 4;
   int16_t iLastIdD = -1, iLastIdQ = -1;
@@ -1979,7 +1983,6 @@ int32_t DecodeCurrentAccessUnit (PWelsDecoderContext pCtx, uint8_t** ppDst, SBuf
     if (!pCtx->pDec->bIsComplete) {  // Ref pictures ECed, result in ECed
       pCtx->iErrorCode |= dsDataErrorConcealed;
     }
-
     // A dq layer decoded here
 #if defined (_DEBUG) &&  !defined (CODEC_FOR_TESTBED)
 #undef fprintf
@@ -2002,6 +2005,7 @@ int32_t DecodeCurrentAccessUnit (PWelsDecoderContext pCtx, uint8_t** ppDst, SBuf
       if (DecodeFrameConstruction (pCtx, ppDst, pDstInfo)) {
         return ERR_NONE;
       }
+
 
       if (uiNalRefIdc > 0) {
         pCtx->pPreviousDecodedPictureInDpb = pCtx->pDec; //store latest decoded picture for EC

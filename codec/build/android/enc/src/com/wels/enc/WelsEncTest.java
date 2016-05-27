@@ -118,7 +118,6 @@ public class WelsEncTest extends Activity {
             DoEncoderAutoTest (inOrgfile, inLayerfile, inYuvfile, outBitfile);
           }
         }
-
         Log.i (TAG, "encoder performance test finish");
         finish();
       }

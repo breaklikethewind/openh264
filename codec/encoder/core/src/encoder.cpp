@@ -218,9 +218,7 @@ int32_t InitFunctionPointers (SWelsFuncPtrList* pFuncList, SWelsSvcCodingParam* 
   WelsBlockFuncInit (&pFuncList->pfSetNZCZero, uiCpuFlag);
 
   InitFillNeighborCacheInterFunc (pFuncList, pParam->bEnableBackgroundDetection);
-
   InitRefListMgrFunc (pFuncList, pParam->bEnableLongTermReference, bScreenContent);
-
   return iReturn;
 }
 
@@ -334,7 +332,6 @@ EVideoFrameType DecideFrameType (sWelsEncCtx* pEncCtx, const int8_t kiSpatialNum
       pEncCtx->iCodingIndex = 0;
       pEncCtx->bCurFrameMarkedAsSceneLtr   = true;
     }
-
   } else {
     // perform scene change detection
     if ((!pSvcParam->bEnableSceneChangeDetect) || pEncCtx->pVaa->bIdrPeriodFlag ||
@@ -398,6 +395,7 @@ extern "C" void DumpDependencyRec (SPicture* pCurPicture, const char* kpFileName
                                   pFrameCrop->iCropBottom) << 1)) : pCurPicture->iHeightInPixel;
     const int32_t kiChromaWidth	= kiLumaWidth >> 1;
     const int32_t kiChromaHeight	= kiLumaHeight >> 1;
+
     uint8_t* pSrc = NULL;
     pSrc = bFrameCroppingFlag ? (pCurPicture->pData[0] + kiStrideY * (pFrameCrop->iCropTop << 1) +
                                  (pFrameCrop->iCropLeft << 1)) : pCurPicture->pData[0];
@@ -440,7 +438,6 @@ void DumpRecFrame (SPicture* pCurPicture, const char* kpFileName, const int8_t k
                       pDqLayer->sLayerInfo.pSpsP;
   bool bFrameCroppingFlag = pSpsTmp->bFrameCroppingFlag;
   SCropOffset* pFrameCrop = &pSpsTmp->sFrameCrop;
-
   int32_t iWrittenSize			= 0;
   const char* openMode = bAppend ? "ab" : "wb";
 
@@ -465,6 +462,7 @@ void DumpRecFrame (SPicture* pCurPicture, const char* kpFileName, const int8_t k
                                   pFrameCrop->iCropBottom) << 1)) : pCurPicture->iHeightInPixel;
     const int32_t kiChromaWidth	= kiLumaWidth >> 1;
     const int32_t kiChromaHeight	= kiLumaHeight >> 1;
+
     uint8_t* pSrc = NULL;
     pSrc = bFrameCroppingFlag ? (pCurPicture->pData[0] + kiStrideY * (pFrameCrop->iCropTop << 1) +
                                  (pFrameCrop->iCropLeft << 1)) : pCurPicture->pData[0];

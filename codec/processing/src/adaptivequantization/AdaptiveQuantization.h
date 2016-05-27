@@ -73,7 +73,6 @@ WELSVP_EXTERN_C_BEGIN
 VarFunc      SampleVariance16x16_AArch64_neon;
 WELSVP_EXTERN_C_END
 #endif
-
 class CAdaptiveQuantization : public IStrategy {
  public:
   CAdaptiveQuantization (int32_t iCpuFlag);

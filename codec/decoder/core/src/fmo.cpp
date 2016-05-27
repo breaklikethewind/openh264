@@ -306,6 +306,11 @@ int32_t FmoMbToSliceGroup (PFmo pFmo, const MB_XY_T kiMbXy) {
  *
  * \return	iNextMb - successful; -1 - failed;
  */
+
+// RTI Change
+#ifdef _WIN32_WCE
+#pragma warning( disable : 4127 )
+#endif
 MB_XY_T FmoNextMb (PFmo pFmo, const MB_XY_T kiMbXy) {
   const int32_t kiTotalMb			= pFmo->iCountMbNum;
   const uint8_t* kpMbMap			= pFmo->pMbAllocMap;

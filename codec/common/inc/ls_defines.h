@@ -87,6 +87,30 @@ STRUCTA (64, 8);
 //inline void __ST64(void *dst, uint64_t v) { memcpy(dst, &v, 8); }
 //	#endif
 
+// RTI Change
+#elif (defined _WIN32_WCE)
+
+#define LD16(a) (*((uap_uint16_t)(a)))
+#define LD32(a) (*((uap_uint32_t)(a)))
+#define LD64(a) (*((uap_uint64_t)(a)))
+
+#define ST16(a, b) *((uap_uint16_t)(a)) = (b)
+#define ST32(a, b) *((uap_uint32_t)(a)) = (b)
+#define ST64(a, b) *((uap_uint64_t)(a)) = (b)
+
+#define LD16A2 LD16
+#define LD32A2 LD32
+#define LD32A4 LD32
+#define LD64A2 LD64
+#define LD64A4 LD64
+#define LD64A8 LD64
+#define ST16A2 ST16
+#define ST32A2 ST32
+#define ST32A4 ST32
+#define ST64A2 ST64
+#define ST64A4 ST64
+#define ST64A8 ST64
+
 #else
 
 //#define INTD16(a) (*((int16_t*)(a)))

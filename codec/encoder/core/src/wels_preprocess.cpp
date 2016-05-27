@@ -184,7 +184,6 @@ int32_t CWelsPreProcess::BuildSpatialPicList (sWelsEncCtx* pCtx, const SSourcePi
     pSvcParam->SUsedPicRect.iHeight = ((kpSrcPic->iPicHeight >> 1) << 1);
     if (WelsPreprocessReset (pCtx) != 0)
       return -1;
-
     m_iAvaliableRefInSpatialPicList = pSvcParam->iNumRefFrame;
 
     m_bInitDone = true;
@@ -1235,7 +1234,6 @@ void CWelsPreProcess::UpdateSrcList (SPicture*	pCurPicture, const int32_t kiCurD
   }
   (GetCurrentFrameFromOrigList (kiCurDid))->SetUnref();
 }
-
 //TODO: may opti later
 //TODO: not use this func?
 void* WelsMemcpy (void* dst, const void* kpSrc, uint32_t uiSize) {

@@ -55,8 +55,6 @@ void IdctResAddPred_neon (uint8_t* pred, const int32_t stride, int16_t* rs);
 #if defined(HAVE_NEON_AARCH64)
 void IdctResAddPred_AArch64_neon (uint8_t* pred, const int32_t stride, int16_t* rs);
 #endif
-
-
 #if defined(__cplusplus)
 }
 #endif//__cplusplus

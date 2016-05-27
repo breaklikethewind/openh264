@@ -188,7 +188,6 @@ class CWelsPreProcess {
   * \return	none
   */
   void WelsExchangeSpatialPictures (SPicture** ppPic1, SPicture** ppPic2);
-
  private:
   Scaled_Picture   m_sScaledPicture;
   SPicture*	   m_pLastSpatialPicture[MAX_DEPENDENCY_LAYER][2];

@@ -49,9 +49,15 @@
 
 #if defined(_WIN32)
 #include <windows.h>
+// RTI Change
+#ifdef _WIN32_WCE
+#include <types.h>
+#else
 #include <sys/types.h>
 #include <sys/timeb.h>
+#endif
 #else
+#include <sys/timeb.h>
 #include <sys/time.h>
 #include "typedefs.h"
 #endif//_WIN32
@@ -69,6 +75,17 @@ extern "C" {
 typedef      FILE  WelsFileHandle;
 
 #ifdef _WIN32
+
+// RTI Change
+#ifdef _WIN32_WCE
+struct _timeb {
+    unsigned int time;		    /* The number of seconds since the start of the Unix epoch: midnight UTC of January 1, 1970*/
+    unsigned short int millitm;	/* Additional milliseconds.  */
+    short int timezone;		    /* Minutes west of GMT.  */
+    short int dstflag;		    /* Nonzero if Daylight Savings Time used.  */
+  };
+#endif
+
 typedef      struct _timeb     SWelsTime;
 #else
 typedef struct TagWelsTime {

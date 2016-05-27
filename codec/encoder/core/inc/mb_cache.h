@@ -74,6 +74,10 @@ typedef struct TagMbCache {
 //the followed pData now is promised aligned to 16 bytes
 ALIGNED_DECLARE (SMVComponentUnit, sMvComponents, 16);
 
+// RTI Change
+#ifdef _WIN32_WCE
+#pragma warning( disable : 4324 )
+#endif
 ALIGNED_DECLARE (int8_t, iNonZeroCoeffCount[48], 16);	// Cache line size
 // 	int8_t		iNonZeroCoeffCount[6 * 8];	// Right luma, Chroma(Left Top Cb, Left btm Cr); must follow by iIntraPredMode!
 ALIGNED_DECLARE (int8_t, iIntraPredMode[48], 16);

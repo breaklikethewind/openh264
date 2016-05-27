@@ -3,7 +3,7 @@
 #include "memory_align.h"
 #include "utils/DataGenerator.h"
 
-using namespace WelsEnc;
+using namespace WelsSVCEnc;
 #include "encode_mb_aux.h"
 
 ALIGNED_DECLARE (const int16_t, g_kiQuantInterFFCompare[104][8], 16) = {

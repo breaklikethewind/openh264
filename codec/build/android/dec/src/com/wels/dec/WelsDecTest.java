@@ -98,8 +98,6 @@ public class WelsDecTest extends Activity {
           inFile = mStreamPath + inFile;
           String outFile = inFile + ".yuv";
           DoDecoderTest (inFile, outFile);
-
-
         }
         Log.i (TAG, "decoder performance test finish");
         finish();

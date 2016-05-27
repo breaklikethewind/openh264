@@ -126,7 +126,6 @@ VAACalcSadVarFunc		VAACalcSadVar_AArch64_neon;
 VAACalcSadSsdFunc		VAACalcSadSsd_AArch64_neon;
 WELSVP_EXTERN_C_END
 #endif
-
 class CVAACalculation : public IStrategy {
  public:
   CVAACalculation (int32_t iCpuFlag);

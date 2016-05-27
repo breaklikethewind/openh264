@@ -37,6 +37,12 @@
 #include <limits.h>
 #include <stddef.h>
 
+// RTI Change
+// Assume if the plaform doesn't define UNALIGNED, then it is not needed
+#ifndef UNALIGNED
+#define UNALIGNED
+#endif
+
 ////////////////////////////////////////////////////////////////////////////
 // NOTICE : ALL internal implement MUST use the data type defined as below
 //          ONLY except with the interface file !!!!!
@@ -56,15 +62,25 @@ typedef int32_t intX_t;
 
 #else
 
-// FIXME:     all singed type should be declared explicit,  for example,  int8_t should be declared as signed char.
 typedef signed char      int8_t  ;
 typedef unsigned char    uint8_t ;
-typedef short            int16_t ;
+typedef signed short     int16_t ;
 typedef unsigned short   uint16_t;
-typedef int              int32_t ;
+typedef signed int       int32_t ;
 typedef unsigned int     uint32_t;
-typedef __int64          int64_t ;
+typedef signed __int64   int64_t ;
 typedef unsigned __int64 uint64_t;
+
+// RTI Change
+typedef signed char UNALIGNED      *uap_int8_t  ;
+typedef unsigned char UNALIGNED    *uap_uint8_t ;
+typedef signed short UNALIGNED     *uap_int16_t ;
+typedef unsigned short UNALIGNED   *uap_uint16_t;
+typedef signed int UNALIGNED       *uap_int32_t ;
+typedef unsigned int UNALIGNED     *uap_uint32_t;
+typedef signed __int64 UNALIGNED   *uap_int64_t ;
+typedef unsigned __int64 UNALIGNED *uap_uint64_t;
+
 #define PRId64 "I64d"
 
 #ifdef _WIN64

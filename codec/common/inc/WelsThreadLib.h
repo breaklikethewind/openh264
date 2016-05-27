@@ -118,7 +118,6 @@ WELS_THREAD_ERROR_CODE    WelsThreadCreate (WELS_THREAD_HANDLE* thread,  LPWELS_
     void* arg, WELS_THREAD_ATTR attr);
 
 WELS_THREAD_ERROR_CODE    WelsThreadSetName (const char* thread_name);
-
 WELS_THREAD_ERROR_CODE    WelsThreadJoin (WELS_THREAD_HANDLE  thread);
 
 WELS_THREAD_HANDLE        WelsThreadSelf();

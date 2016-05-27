@@ -772,7 +772,6 @@ void RcTraceFrameBits (void* pCtx, long long uiTimeStamp) {
     (uint32_t)uiTimeStamp,pEncCtx->eSliceType, pEncCtx->uiDependencyId, pWelsSvcRc->iAverageFrameQp,pWelsSvcRc->iMaxFrameQp,pWelsSvcRc->iMinFrameQp,
     pEncCtx->iFrameIndex, pEncCtx->uiTemporalId, pWelsSvcRc->iFrameDqBits,WELS_DIV_ROUND (pWelsSvcRc->iBitsPerFrame, INT_MULTIPLY),
     pWelsSvcRc->iTargetBits, pWelsSvcRc->iRemainingBits, pWelsSvcRc->iBufferSizeSkip);
-
 }
 
 void RcUpdatePictureQpBits (sWelsEncCtx* pEncCtx, int32_t iCodedBits) {
@@ -896,6 +895,8 @@ void  WelsRcPictureInfoUpdateGom (void* pCtx, int32_t iLayerSize) {
     RcUpdateIntraComplexity (pEncCtx);
   }
   pWelsSvcRc->iRemainingBits -= pWelsSvcRc->iFrameDqBits;
+
+
 
   if (pEncCtx->pSvcParam->bEnableFrameSkip /*&&
       pEncCtx->uiDependencyId == pEncCtx->pSvcParam->iSpatialLayerNum - 1*/) {

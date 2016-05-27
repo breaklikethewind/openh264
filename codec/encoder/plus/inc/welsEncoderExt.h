@@ -82,6 +82,8 @@ class CWelsH264SVCEncoder : public ISVCEncoder {
    * return: 0 - success; otherwise - failed;
    */
   virtual int EXTAPI EncodeParameterSets (SFrameBSInfo* pBsInfo);
+
+
   /*
    * return: 0 - success; otherwise - failed;
    */
@@ -103,7 +105,6 @@ class CWelsH264SVCEncoder : public ISVCEncoder {
   void CheckReferenceNumSetting (int32_t iNumRef);
   void TraceParamInfo(SEncParamExt *pParam);
   void UpdateStatistics(const int64_t kiCurrentFrameTs, EVideoFrameType eFrameType,  const int64_t kiCurrentFrameMs);
-
   sWelsEncCtx*	m_pEncContext;
 
   welsCodecTrace*			m_pWelsTrace;

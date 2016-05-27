@@ -5,7 +5,7 @@
 #include "utils/InputStream.h"
 #include "BaseDecoderTest.h"
 #include "BaseEncoderTest.h"
-#include <string>
+
 static void UpdateHashFromFrame (const SFrameBSInfo& info, SHA1Context* ctx) {
   for (int i = 0; i < info.iLayerNum; ++i) {
     const SLayerBSInfo& layerInfo = info.sLayerInfo[i];
@@ -93,25 +93,20 @@ class DecodeEncodeTest : public ::testing::TestWithParam<DecodeEncodeFileParam>,
 
 TEST_P (DecodeEncodeTest, CompareOutput) {
   DecodeEncodeFileParam p = GetParam();
-#if defined(ANDROID_NDK)
-  std::string filename = std::string ("/sdcard/") + p.fileName;
-  ASSERT_TRUE (Open (filename.c_str()));
-#else
+
   ASSERT_TRUE (Open (p.fileName));
-#endif
-  EncodeStream (this, CAMERA_VIDEO_REAL_TIME, p.width, p.height, p.frameRate, SM_SINGLE_SLICE, false, 1, false, false,
-                this);
+  EncodeStream (this, CAMERA_VIDEO_REAL_TIME, p.width, p.height, p.frameRate, SM_SINGLE_SLICE, false, 1, this);
   unsigned char digest[SHA_DIGEST_LENGTH];
   SHA1Result (&ctx_, digest);
   if (!HasFatalFailure()) {
     CompareHash (digest, p.hashStr);
   }
 }
+
 static const DecodeEncodeFileParam kFileParamArray[] = {
   {"res/test_vd_1d.264", "a4c7299ec1a7bacd5819685e221a79ac2b56cdbc", 320, 192, 12.0f},
   {"res/test_vd_rc.264", "106fd8cc978c1801b0d1f8297e9b7f17d5336e15", 320, 192, 12.0f},
 };
-
 
 INSTANTIATE_TEST_CASE_P (DecodeEncodeFile, DecodeEncodeTest,
                          ::testing::ValuesIn (kFileParamArray));

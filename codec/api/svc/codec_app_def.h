@@ -102,7 +102,6 @@ typedef enum {
   ENCODER_OPTION_TRACE_LEVEL,
   ENCODER_OPTION_TRACE_CALLBACK, // a void (*)(void* context, int level, const char* message) function which receives log messages
   ENCODER_OPTION_TRACE_CALLBACK_CONTEXT,
-
   ENCODER_OPTION_GET_STATISTICS, //read only
   ENCODER_OPTION_STATISTICS_LOG_INTERVAL, // log interval in milliseconds
 
@@ -124,7 +123,6 @@ typedef enum {
   DECODER_OPTION_TRACE_LEVEL,
   DECODER_OPTION_TRACE_CALLBACK, // a void (*)(void* context, int level, const char* message) function which receives log messages
   DECODER_OPTION_TRACE_CALLBACK_CONTEXT,
-
   DECODER_OPTION_GET_STATISTICS
 
 } DECODER_OPTION;
@@ -354,7 +352,6 @@ typedef struct TagEncParamExt {
   bool    bEnableAdaptiveQuant; // adaptive quantization control
   bool	  bEnableFrameCroppingFlag;// enable frame cropping flag: TRUE always in application
   bool    bEnableSceneChangeDetect;
-
   /*LTR advanced setting*/
   bool    bIsLosslessLink;
 } SEncParamExt;
@@ -439,7 +436,6 @@ typedef struct TagDeliveryStatus {
   int iDropFrameType; // the frame type that is dropped; reserved
   int iDropFrameSize; // the frame size that is dropped; reserved
 } SDeliveryStatus;
-
 typedef struct TagDecoderCapability {
   int iProfileIdc;
   int iProfileIop;
@@ -493,5 +489,4 @@ typedef struct TagVideoDecoderStatistics {
   unsigned int uiLTRReqNum;	// number of actual LTR request
   unsigned int uiIDRRecvNum;	// number of actual IDR received
 } SDecoderStatistics; // in building, coming soon
-
 #endif//WELS_VIDEO_CODEC_APPLICATION_DEFINITION_H__

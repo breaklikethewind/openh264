@@ -91,6 +91,10 @@ void* InternalReallocate (void* pPointer, const uint32_t kuiSize, char* pTag) {
 
 /////////////////////////////////////////////////////////////////////////////
 
+// RTI Change
+#ifdef _WIN32_WCE
+#pragma warning( disable : 4702 )
+#endif
 void* WelsRealloc (void* pPointer, uint32_t* pRealSize, const uint32_t kuiSize, char* pTag) {
   const uint32_t kuiOldSize = *pRealSize;
   uint32_t kuiNewSize = 0;

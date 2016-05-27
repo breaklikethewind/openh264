@@ -1,6 +1,10 @@
 #include "deblocking_common.h"
 #include "macros.h"
 //  C code only
+// RTI Change
+#ifdef _WIN32_WCE
+#pragma warning( disable : 4244 )
+#endif
 void DeblockLumaLt4_c (uint8_t* pPix, int32_t iStrideX, int32_t iStrideY, int32_t iAlpha, int32_t iBeta,
                        int8_t* pTc) {
   for (int32_t i = 0; i < 16; i++) {

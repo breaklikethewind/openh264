@@ -37,6 +37,7 @@
 #include "wels_const.h"
 #include "utils.h"
 #include "macros.h"
+
 #include "version.h"
 #include "crt_util_safe_x.h"	// Safe CRT routines like util for cross platforms
 #include "ref_list_mgr_svc.h"
@@ -48,7 +49,12 @@
 #include <windows.h>
 #include <stdio.h>
 #include <stdarg.h>
+
+// RTI Change
+#ifndef _WIN32_WCE
 #include <sys/types.h>
+#include <sys/timeb.h>
+#endif
 #else
 #include <sys/time.h>
 #endif
@@ -174,6 +180,7 @@ void CWelsH264SVCEncoder::InitEncoder (void) {
   }
 
   m_pWelsTrace->SetTraceLevel (WELS_LOG_ERROR);
+
   WelsLog (&m_pWelsTrace->m_sLogCtx, WELS_LOG_INFO, "CWelsH264SVCEncoder::InitEncoder(), openh264 codec version = %s",
            VERSION_NUMBER);
 #ifdef REC_FRAME_COUNT
@@ -217,6 +224,7 @@ int CWelsH264SVCEncoder::Initialize (const SEncParamBase* argv) {
 }
 
 int CWelsH264SVCEncoder::InitializeExt (const SEncParamExt* argv) {
+
   if (m_pWelsTrace == NULL) {
     return cmMallocMemeError;
   }
@@ -260,6 +268,7 @@ int CWelsH264SVCEncoder::InitializeInternal (SWelsSvcCodingParam* pCfg) {
            "CWelsH264SVCEncoder::Initialize, m_uiCountFrameNum= %d, m_iCspInternal= 0x%x",
            m_uiCountFrameNum, m_iCspInternal);
 #endif//REC_FRAME_COUNT
+
 
   // Check valid parameters
   const int32_t iNumOfLayers = pCfg->iSpatialLayerNum;
@@ -393,6 +402,7 @@ int32_t CWelsH264SVCEncoder::Uninitialize() {
  *	SVC core encoding
  */
 int CWelsH264SVCEncoder::EncodeFrame (const SSourcePicture* kpSrcPic, SFrameBSInfo* pBsInfo) {
+
   if (! (kpSrcPic && m_bInitialFlag && pBsInfo)) {
     return cmInitParaError;
   }
@@ -430,9 +440,7 @@ int CWelsH264SVCEncoder ::EncodeFrameInternal (const SSourcePicture*  pSrcPic, S
              kiEncoderReturn);
     return cmUnkonwReason;
   }
-
   UpdateStatistics (pSrcPic->uiTimeStamp, pBsInfo->eFrameType, kiCurrentFrameMs);
-
   ///////////////////for test
 #ifdef OUTPUT_BIT_STREAM
   if (pBsInfo->eFrameType != videoFrameTypeInvalid && pBsInfo->eFrameType != videoFrameTypeSkip) {
@@ -487,6 +495,8 @@ int CWelsH264SVCEncoder ::EncodeFrameInternal (const SSourcePicture*  pSrcPic, S
 int CWelsH264SVCEncoder::EncodeParameterSets (SFrameBSInfo* pBsInfo) {
   return WelsEncoderEncodeParameterSets (m_pEncContext, pBsInfo);
 }
+
+
 
 /*
  *	Force key frame
@@ -649,7 +659,6 @@ void CWelsH264SVCEncoder::UpdateStatistics (const int64_t kiCurrentFrameTs, EVid
   }
 
 }
-
 /************************************************************************
 * InDataFormat, IDRInterval, SVC Encode Param, Frame Rate, Bitrate,..
 ************************************************************************/
@@ -751,6 +760,7 @@ int CWelsH264SVCEncoder::SetOption (ENCODER_OPTION eOptionId, void* pOption) {
              "CWelsH264SVCEncoder::SetOption():ENCODER_OPTION_SVC_ENCODE_PARAM_EXT, m_uiCountFrameNum= %d, m_iCspInternal= 0x%x",
              m_uiCountFrameNum, m_iCspInternal);
 #endif//REC_FRAME_COUNT
+
 
     /* Check every field whether there is new request for memory block changed or else, Oct. 24, 2008 */
     if (WelsEncoderParamAdjust (&m_pEncContext, &sConfig)) {

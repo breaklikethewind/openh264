@@ -185,6 +185,10 @@ static inline uint32_t BsGetUe (PBitStringAux pBs, uint32_t* pCode) {
 /*
  *	Read signed exp golomb codes
  */
+// RTI Change
+#ifdef _WIN32_WCE
+#pragma warning( disable : 4127 )
+#endif
 static inline int32_t BsGetSe (PBitStringAux pBs, int32_t* pCode) {
   uint32_t uiCodeNum;
 

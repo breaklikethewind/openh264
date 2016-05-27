@@ -71,6 +71,8 @@ class ISVCEncoder {
    * return: 0 - success; otherwise - failed;
    */
   virtual int EXTAPI EncodeParameterSets (SFrameBSInfo* pBsInfo) = 0;
+
+
   /*
    * return: 0 - success; otherwise - failed;
    */
@@ -153,6 +155,7 @@ int (*Uninitialize) (ISVCEncoder*);
 int (*EncodeFrame) (ISVCEncoder*, const SSourcePicture* kpSrcPic, SFrameBSInfo* pBsInfo);
 int (*EncodeParameterSets) (ISVCEncoder*, SFrameBSInfo* pBsInfo);
 
+
 int (*ForceIntraFrame) (ISVCEncoder*, bool bIDR);
 
 int (*SetOption) (ISVCEncoder*, ENCODER_OPTION eOptionId, void* pOption);
@@ -180,7 +183,6 @@ DECODING_STATE (*DecodeFrame2) (ISVCDecoder*, const unsigned char* pSrc,
 DECODING_STATE (*DecodeParser) (ISVCDecoder*, const unsigned char* pSrc,
                                 const int iSrcLen,
                                 SParserBsInfo* pDstInfo);
-
 DECODING_STATE (*DecodeFrameEx) (ISVCDecoder*, const unsigned char* pSrc,
                                  const int iSrcLen,
                                  unsigned char* pDst,

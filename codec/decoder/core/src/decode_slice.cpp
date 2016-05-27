@@ -51,6 +51,10 @@
 
 namespace WelsDec {
 
+// RTI Change
+#ifdef _WIN32_WCE
+#pragma warning( disable : 4244 )
+#endif
 int32_t WelsTargetSliceConstruction (PWelsDecoderContext pCtx) {
   PDqLayer pCurLayer = pCtx->pCurDqLayer;
   PSlice pCurSlice = &pCurLayer->sLayerInfo.sSliceInLayer;

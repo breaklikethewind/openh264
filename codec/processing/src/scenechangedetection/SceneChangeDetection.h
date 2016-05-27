@@ -68,6 +68,10 @@ typedef struct {
   uint8_t* pStaticBlockIdc;
 } SLocalParam;
 
+// RTI Change
+#ifdef _WIN32_WCE
+#pragma warning( disable : 4512 )
+#endif
 class CSceneChangeDetectorVideo {
  public:
   CSceneChangeDetectorVideo (SSceneChangeResult& sParam, int32_t iCpuFlag) : m_sParam (sParam) {

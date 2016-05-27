@@ -98,6 +98,10 @@ void CDownsampling::InitDownsampleFuncs (SDownsampleFuncs& sDownsampleFunc,  int
 #endif
 }
 
+// RTI Change
+#ifdef _WIN32_WCE
+#pragma warning( disable : 4244 )
+#endif
 EResult CDownsampling::Process (int32_t iType, SPixMap* pSrcPixMap, SPixMap* pDstPixMap) {
   int32_t iSrcWidthY = pSrcPixMap->sRect.iRectWidth;
   int32_t iSrcHeightY = pSrcPixMap->sRect.iRectHeight;
