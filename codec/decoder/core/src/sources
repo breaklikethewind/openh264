@@ -1,0 +1,48 @@
+!if 0
+Copyright (C) 2007-2010, Freescale Semiconductor, Inc. All Rights Reserved.
+THIS SOURCE CODE, AND ITS USE AND DISTRIBUTION, IS SUBJECT TO THE TERMS
+AND CONDITIONS OF THE APPLICABLE LICENSE AGREEMENT
+!endif
+
+!IF "$(BSP_CODEC_OPENH264)" == ""
+SKIPBUILD=1
+!ELSE
+CDEFINES= $(CDEFINES) -DBSP_CODEC_OPENH264
+!ENDIF
+
+TARGETNAME=oh264_dec_core
+TARGETTYPE=LIBRARY
+RELEASETYPE=DDK
+
+SOURCES= \
+    au_parser.cpp \
+    bit_stream.cpp \
+    deblocking.cpp \
+    decode_mb_aux.cpp \
+    decoder.cpp \
+    decoder_core.cpp \
+    decoder_data_tables.cpp \
+    decode_slice.cpp \
+    error_concealment.cpp \
+    fmo.cpp \
+    get_intra_predictor.cpp \
+    manage_dec_ref.cpp \
+    memmgr_nal_unit.cpp \
+    mv_pred.cpp \
+    parse_mb_syn_cavlc.cpp \
+    pic_queue.cpp \
+    rec_mb.cpp \
+    mem_align.cpp \
+    mc.cpp \
+
+
+!IF "$(BSP_NEON)" != ""
+ARM_SOURCES=\
+            block_add_neon.S \
+            intra_pred_neon.S 
+CDEFINES= $(CDEFINES) -DBSP_NEON
+!ENDIF
+
+INCLUDES= \
+    $(INCLUDES);..\inc;..\..\..\common/inc;$(_TARGETPLATROOT)\src\Apps\Codecs\OPENH264\codec\api\svc \
+

@@ -1,0 +1,60 @@
+!if 0
+Copyright (C) 2007-2010, Freescale Semiconductor, Inc. All Rights Reserved.
+THIS SOURCE CODE, AND ITS USE AND DISTRIBUTION, IS SUBJECT TO THE TERMS
+AND CONDITIONS OF THE APPLICABLE LICENSE AGREEMENT
+!endif
+
+!IF "$(BSP_CODEC_OPENH264)" == ""
+SKIPBUILD=1
+!ELSE
+CDEFINES= $(CDEFINES) -DBSP_CODEC_OPENH264
+!ENDIF
+
+TARGETNAME=oh264_enc_core
+TARGETTYPE=LIBRARY
+RELEASETYPE=DDK
+
+SOURCES= \
+    au_set.cpp \
+    deblocking.cpp \
+    decode_mb_aux.cpp \
+    encode_mb_aux.cpp \
+    encoder.cpp \
+    encoder_data_tables.cpp \
+    encoder_ext.cpp \
+    get_intra_predictor.cpp \
+    md.cpp \
+    mv_pred.cpp \
+    nal_encap.cpp \
+    picture_handle.cpp \
+    ratectl.cpp \
+    ref_list_mgr_svc.cpp \
+    sample.cpp \
+    set_mb_syn_cavlc.cpp \
+    slice_multi_threading.cpp \
+    svc_base_layer_md.cpp \
+    svc_encode_mb.cpp \
+    svc_encode_slice.cpp \
+    svc_enc_slice_segment.cpp \
+    svc_mode_decision.cpp \
+    svc_motion_estimate.cpp \
+    svc_set_mb_syn_cavlc.cpp \
+    wels_preprocess.cpp \
+    mc.cpp \
+    memory_align.cpp \
+
+
+!IF "$(BSP_NEON)" != ""
+ARM_SOURCES=\
+            intra_pred_neon.S \
+            intra_pred_sad_3_opt_neon.S \
+            memory_neon.S \
+            pixel_neon.S \
+            reconstruct_neon.S \
+            svc_motion_estimation.S           
+CDEFINES= $(CDEFINES) -DBSP_NEON
+!ENDIF
+INCLUDES= \
+    $(INCLUDES);..\inc;..\..\..\common/inc;..\..\..\processing\interface;$(_TARGETPLATROOT)\src\Apps\Codecs\OPENH264\codec\api\svc \
+
+

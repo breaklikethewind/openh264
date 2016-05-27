@@ -30,6 +30,8 @@ codec_unittest
 *.exp
 *.pdb
 *.log
+*.mac
+*.tmp
 
 # Executables built by the MSVC project files
 bin

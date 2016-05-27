@@ -1,0 +1,12 @@
+DIRS=\
+	adaptivequantization\
+	backgrounddetection\
+	common\
+	complexityanalysis\
+	denoise\
+	downsample\
+	imagerotate\
+	scenechangedetection\
+	scrolldetection\
+	vaacalc
+

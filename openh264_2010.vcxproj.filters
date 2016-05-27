@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="api">
+      <UniqueIdentifier>{663551ef-2fad-4dd4-a6ce-7e09b7a2ddf4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="common">
+      <UniqueIdentifier>{f21314d9-4dec-439b-9f41-ee5d7fd8946d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="api\include">
+      <UniqueIdentifier>{f2c3a8d9-9cc2-4074-afdb-d47e220718e0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="common\src">
+      <UniqueIdentifier>{1a1049ac-7390-4e92-8dab-4de15855ac45}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="common\inc">
+      <UniqueIdentifier>{dd3a5d68-8433-49f8-979e-0c4fb1d1d60f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="openh264">
+      <UniqueIdentifier>{2a14a319-1a4e-4672-b8f5-fc77fd947703}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="codec\api\svc\codec_api.h">
+      <Filter>api\include</Filter>
+    </ClInclude>
+    <ClInclude Include="codec\api\svc\codec_app_def.h">
+      <Filter>api\include</Filter>
+    </ClInclude>
+    <ClInclude Include="codec\api\svc\codec_def.h">
+      <Filter>api\include</Filter>
+    </ClInclude>
+    <ClInclude Include="codec\api\svc\codec_ver.h">
+      <Filter>api\include</Filter>
+    </ClInclude>
+    <ClInclude Include="codec\common\inc\copy_mb.h">
+      <Filter>common\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="codec\common\inc\cpu.h">
+      <Filter>common\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="codec\common\inc\cpu_core.h">
+      <Filter>common\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="codec\common\inc\crt_util_safe_x.h">
+      <Filter>common\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="codec\common\inc\deblocking_common.h">
+      <Filter>common\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="codec\common\inc\expand_pic.h">
+      <Filter>common\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="codec\common\inc\golomb_common.h">
+      <Filter>common\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="codec\common\inc\intra_pred_common.h">
+      <Filter>common\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="codec\common\inc\ls_defines.h">
+      <Filter>common\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="codec\common\inc\macros.h">
+      <Filter>common\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="codec\common\inc\mc.h">
+      <Filter>common\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="codec\common\inc\measure_time.h">
+      <Filter>common\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="codec\common\inc\memory_align.h">
+      <Filter>common\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="codec\common\inc\sad_common.h">
+      <Filter>common\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="codec\common\inc\typedefs.h">
+      <Filter>common\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="codec\common\inc\utils.h">
+      <Filter>common\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="codec\common\inc\version.h">
+      <Filter>common\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="codec\common\inc\wels_common_defs.h">
+      <Filter>common\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="codec\common\inc\wels_const_common.h">
+      <Filter>common\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="codec\common\inc\WelsCircleQueue.h">
+      <Filter>common\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="codec\common\inc\welsCodecTrace.h">
+      <Filter>common\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="codec\common\inc\WelsList.h">
+      <Filter>common\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="codec\common\inc\WelsLock.h">
+      <Filter>common\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="codec\common\inc\WelsTask.h">
+      <Filter>common\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="codec\common\inc\WelsTaskThread.h">
+      <Filter>common\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="codec\common\inc\WelsThread.h">
+      <Filter>common\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="codec\common\inc\WelsThreadLib.h">
+      <Filter>common\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="codec\common\inc\WelsThreadPool.h">
+      <Filter>common\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="openh264\openh264.h">
+      <Filter>openh264</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="codec\common\src\common_tables.cpp">
+      <Filter>common\src</Filter>
+    </ClCompile>
+    <ClCompile Include="codec\common\src\copy_mb.cpp">
+      <Filter>common\src</Filter>
+    </ClCompile>
+    <ClCompile Include="codec\common\src\cpu.cpp">
+      <Filter>common\src</Filter>
+    </ClCompile>
+    <ClCompile Include="codec\common\src\crt_util_safe_x.cpp">
+      <Filter>common\src</Filter>
+    </ClCompile>
+    <ClCompile Include="codec\common\src\deblocking_common.cpp">
+      <Filter>common\src</Filter>
+    </ClCompile>
+    <ClCompile Include="codec\common\src\expand_pic.cpp">
+      <Filter>common\src</Filter>
+    </ClCompile>
+    <ClCompile Include="codec\common\src\sad_common.cpp">
+      <Filter>common\src</Filter>
+    </ClCompile>
+    <ClCompile Include="codec\common\src\utils.cpp">
+      <Filter>common\src</Filter>
+    </ClCompile>
+    <ClCompile Include="codec\common\src\welsCodecTrace.cpp">
+      <Filter>common\src</Filter>
+    </ClCompile>
+    <ClCompile Include="codec\common\src\WelsThreadLib.cpp">
+      <Filter>common\src</Filter>
+    </ClCompile>
+    <ClCompile Include="openh264\Entry.cpp">
+      <Filter>openh264</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

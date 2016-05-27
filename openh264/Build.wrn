@@ -1,0 +1,17 @@
+BUILD: [Thrd:Sequence:Type  ] Message
+BUILD: [00:0000000049:WARNN ] Warning(s) in directory "C:\WINCE700\platform\MX35\src\Apps\Codecs\OPENH264\openh264\".
+BUILD: [00:0000000050:WARNN ] C:\WINCE700\platform\MX35\src\Apps\Codecs\OPENH264\openh264\: Missing source file: C:\WINCE700\osdesigns\KX7\Wince700\MX35_ARMV6_Retail\cesysgen\ddk\lib\ARMV6\retail\oh264_common.lib.
+BUILD: [00:0000000051:WARNN ] C:\WINCE700\platform\MX35\src\Apps\Codecs\OPENH264\openh264\: Missing source file: C:\WINCE700\osdesigns\KX7\Wince700\MX35_ARMV6_Retail\cesysgen\ddk\lib\ARMV6\retail\oh264_dec_core.lib.
+BUILD: [00:0000000052:WARNN ] C:\WINCE700\platform\MX35\src\Apps\Codecs\OPENH264\openh264\: Missing source file: C:\WINCE700\osdesigns\KX7\Wince700\MX35_ARMV6_Retail\cesysgen\ddk\lib\ARMV6\retail\oh264_dec_plus.lib.
+BUILD: [00:0000000053:WARNN ] C:\WINCE700\platform\MX35\src\Apps\Codecs\OPENH264\openh264\: Missing source file: C:\WINCE700\osdesigns\KX7\Wince700\MX35_ARMV6_Retail\cesysgen\ddk\lib\ARMV6\retail\oh264_enc_core.lib.
+BUILD: [00:0000000054:WARNN ] C:\WINCE700\platform\MX35\src\Apps\Codecs\OPENH264\openh264\: Missing source file: C:\WINCE700\osdesigns\KX7\Wince700\MX35_ARMV6_Retail\cesysgen\ddk\lib\ARMV6\retail\oh264_enc_plus.lib.
+BUILD: [00:0000000055:WARNN ] C:\WINCE700\platform\MX35\src\Apps\Codecs\OPENH264\openh264\: Missing source file: C:\WINCE700\osdesigns\KX7\Wince700\MX35_ARMV6_Retail\cesysgen\ddk\lib\ARMV6\retail\oh264_proc_aq.lib.
+BUILD: [00:0000000056:WARNN ] C:\WINCE700\platform\MX35\src\Apps\Codecs\OPENH264\openh264\: Missing source file: C:\WINCE700\osdesigns\KX7\Wince700\MX35_ARMV6_Retail\cesysgen\ddk\lib\ARMV6\retail\oh264_proc_bd.lib.
+BUILD: [00:0000000057:WARNN ] C:\WINCE700\platform\MX35\src\Apps\Codecs\OPENH264\openh264\: Missing source file: C:\WINCE700\osdesigns\KX7\Wince700\MX35_ARMV6_Retail\cesysgen\ddk\lib\ARMV6\retail\oh264_proc_common.lib.
+BUILD: [00:0000000058:WARNN ] C:\WINCE700\platform\MX35\src\Apps\Codecs\OPENH264\openh264\: Missing source file: C:\WINCE700\osdesigns\KX7\Wince700\MX35_ARMV6_Retail\cesysgen\ddk\lib\ARMV6\retail\oh264_proc_ca.lib.
+BUILD: [00:0000000059:WARNN ] C:\WINCE700\platform\MX35\src\Apps\Codecs\OPENH264\openh264\: Missing source file: C:\WINCE700\osdesigns\KX7\Wince700\MX35_ARMV6_Retail\cesysgen\ddk\lib\ARMV6\retail\oh264_proc_dn.lib.
+BUILD: [00:0000000060:WARNN ] C:\WINCE700\platform\MX35\src\Apps\Codecs\OPENH264\openh264\: Missing source file: C:\WINCE700\osdesigns\KX7\Wince700\MX35_ARMV6_Retail\cesysgen\ddk\lib\ARMV6\retail\oh264_proc_ds.lib.
+BUILD: [00:0000000061:WARNN ] C:\WINCE700\platform\MX35\src\Apps\Codecs\OPENH264\openh264\: Missing source file: C:\WINCE700\osdesigns\KX7\Wince700\MX35_ARMV6_Retail\cesysgen\ddk\lib\ARMV6\retail\oh264_proc_ir.lib.
+BUILD: [00:0000000062:WARNN ] C:\WINCE700\platform\MX35\src\Apps\Codecs\OPENH264\openh264\: Missing source file: C:\WINCE700\osdesigns\KX7\Wince700\MX35_ARMV6_Retail\cesysgen\ddk\lib\ARMV6\retail\oh264_proc_scd.lib.
+BUILD: [00:0000000063:WARNN ] C:\WINCE700\platform\MX35\src\Apps\Codecs\OPENH264\openh264\: Missing source file: C:\WINCE700\osdesigns\KX7\Wince700\MX35_ARMV6_Retail\cesysgen\ddk\lib\ARMV6\retail\oh264_proc_sd.lib.
+BUILD: [00:0000000064:WARNN ] C:\WINCE700\platform\MX35\src\Apps\Codecs\OPENH264\openh264\: Missing source file: C:\WINCE700\osdesigns\KX7\Wince700\MX35_ARMV6_Retail\cesysgen\ddk\lib\ARMV6\retail\oh264_proc_vac.lib.

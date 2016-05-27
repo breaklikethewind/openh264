@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="codec\api\svc\codec_api.h" />
+    <ClInclude Include="codec\api\svc\codec_app_def.h" />
+    <ClInclude Include="codec\api\svc\codec_def.h" />
+    <ClInclude Include="codec\api\svc\codec_ver.h" />
+    <ClInclude Include="codec\common\inc\copy_mb.h" />
+    <ClInclude Include="codec\common\inc\cpu.h" />
+    <ClInclude Include="codec\common\inc\cpu_core.h" />
+    <ClInclude Include="codec\common\inc\crt_util_safe_x.h" />
+    <ClInclude Include="codec\common\inc\deblocking_common.h" />
+    <ClInclude Include="codec\common\inc\expand_pic.h" />
+    <ClInclude Include="codec\common\inc\golomb_common.h" />
+    <ClInclude Include="codec\common\inc\intra_pred_common.h" />
+    <ClInclude Include="codec\common\inc\ls_defines.h" />
+    <ClInclude Include="codec\common\inc\macros.h" />
+    <ClInclude Include="codec\common\inc\mc.h" />
+    <ClInclude Include="codec\common\inc\measure_time.h" />
+    <ClInclude Include="codec\common\inc\memory_align.h" />
+    <ClInclude Include="codec\common\inc\sad_common.h" />
+    <ClInclude Include="codec\common\inc\typedefs.h" />
+    <ClInclude Include="codec\common\inc\utils.h" />
+    <ClInclude Include="codec\common\inc\version.h" />
+    <ClInclude Include="codec\common\inc\WelsCircleQueue.h" />
+    <ClInclude Include="codec\common\inc\welsCodecTrace.h" />
+    <ClInclude Include="codec\common\inc\WelsList.h" />
+    <ClInclude Include="codec\common\inc\WelsLock.h" />
+    <ClInclude Include="codec\common\inc\WelsTask.h" />
+    <ClInclude Include="codec\common\inc\WelsTaskThread.h" />
+    <ClInclude Include="codec\common\inc\WelsThread.h" />
+    <ClInclude Include="codec\common\inc\WelsThreadLib.h" />
+    <ClInclude Include="codec\common\inc\WelsThreadPool.h" />
+    <ClInclude Include="codec\common\inc\wels_common_defs.h" />
+    <ClInclude Include="codec\common\inc\wels_const_common.h" />
+    <ClInclude Include="openh264\openh264.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="codec\common\src\common_tables.cpp" />
+    <ClCompile Include="codec\common\src\copy_mb.cpp" />
+    <ClCompile Include="codec\common\src\cpu.cpp" />
+    <ClCompile Include="codec\common\src\crt_util_safe_x.cpp" />
+    <ClCompile Include="codec\common\src\deblocking_common.cpp" />
+    <ClCompile Include="codec\common\src\expand_pic.cpp" />
+    <ClCompile Include="codec\common\src\sad_common.cpp" />
+    <ClCompile Include="codec\common\src\utils.cpp" />
+    <ClCompile Include="codec\common\src\welsCodecTrace.cpp" />
+    <ClCompile Include="codec\common\src\WelsThreadLib.cpp" />
+    <ClCompile Include="openh264\Entry.cpp" />
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectName>Open H264 Video Codec</ProjectName>
+    <ProjectGuid>{8ea133d1-d8a1-4d6d-8d1e-aca16207d0ce}</ProjectGuid>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC71.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC71.props" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    </OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(OutDir)$(ProjectName)\</IntDir>
+    <IgnoreImportLibrary Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</IgnoreImportLibrary>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\..\..\projects\RemoteUI\Current\VoIP\opal\bin\OpenPhone\Win32\Debug\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(OutDir)$(ProjectName)\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    </LinkIncremental>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">openh264_x86</TargetName>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">openh264_x86</TargetName>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Midl>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MkTypLibCompatible>true</MkTypLibCompatible>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <TargetEnvironment>Win32</TargetEnvironment>
+      <TypeLibraryName>$(IntDir)$(TargetName).tlb</TypeLibraryName>
+      <HeaderFileName>
+      </HeaderFileName>
+    </Midl>
+    <ClCompile>
+      <Optimization>MaxSpeed</Optimization>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <AdditionalIncludeDirectories>codec\api\svc;codec\common\inc;codec\processing\interface;codec\encoder\core\inc;codec\encoder\plus\inc;codec\decoder\core\inc;codec\decoder\plus\inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;PLUGIN_CODEC_DLL_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <StringPooling>true</StringPooling>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <ProgramDataBaseFileName>$(IntDir)$(TargetName).pdb</ProgramDataBaseFileName>
+      <WarningLevel>Level3</WarningLevel>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <Culture>0x0c09</Culture>
+    </ResourceCompile>
+    <Link>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention>
+      </DataExecutionPrevention>
+      <ImportLibrary>$(IntDir)$(TargetName).lib</ImportLibrary>
+      <TargetMachine>MachineX86</TargetMachine>
+      <AdditionalDependencies>Release\openh264_encoder_2010.lib;Release\openh264_decoder_2010.lib;Release\openh264_processing_2010.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <ModuleDefinitionFile>openh264.def</ModuleDefinitionFile>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Midl>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MkTypLibCompatible>true</MkTypLibCompatible>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <TargetEnvironment>Win32</TargetEnvironment>
+      <TypeLibraryName>$(IntDir)$(TargetName).tlb</TypeLibraryName>
+      <HeaderFileName>
+      </HeaderFileName>
+    </Midl>
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>codec\api\svc;codec\common\inc;codec\processing\interface;codec\encoder\core\inc;codec\encoder\plus\inc;codec\decoder\core\inc;codec\decoder\plus\inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;PLUGIN_CODEC_DLL_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <ProgramDataBaseFileName>$(TargetDir)/$(TargetName).pdb</ProgramDataBaseFileName>
+      <WarningLevel>Level4</WarningLevel>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <Culture>0x0c09</Culture>
+    </ResourceCompile>
+    <Link>
+      <AdditionalDependencies>Debug\openh264_encoder_2010.lib;Debug\openh264_decoder_2010.lib;Debug\openh264_processing_2010.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention>
+      </DataExecutionPrevention>
+      <ImportLibrary>$(IntDir)$(TargetName).lib</ImportLibrary>
+      <TargetMachine>MachineX86</TargetMachine>
+      <ModuleDefinitionFile>openh264.def</ModuleDefinitionFile>
+    </Link>
+    <PostBuildEvent>
+      <Message>Copying codec and debug information to plug in directory</Message>
+      <Command>if not exist c:\ptlib_plugins exit
+copy $(TargetPath) c:\ptlib_plugins
+copy $(TargetDir)\$(TargetName).pdb c:\ptlib_plugins
+</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

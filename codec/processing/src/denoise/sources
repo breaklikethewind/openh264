@@ -1,0 +1,22 @@
+!if 0
+Copyright (C) 2007-2010, Freescale Semiconductor, Inc. All Rights Reserved.
+THIS SOURCE CODE, AND ITS USE AND DISTRIBUTION, IS SUBJECT TO THE TERMS
+AND CONDITIONS OF THE APPLICABLE LICENSE AGREEMENT
+!endif
+
+!IF "$(BSP_CODEC_OPENH264)" == ""
+SKIPBUILD=1
+!ELSE
+CDEFINES= $(CDEFINES) -DBSP_CODEC_OPENH264
+!ENDIF
+
+TARGETNAME=oh264_proc_dn
+TARGETTYPE=LIBRARY
+RELEASETYPE=DDK
+
+SOURCES=\
+        denoise.cpp \
+        denoise_filter.cpp
+
+INCLUDES= \
+    $(INCLUDES);..\common;..\..\..\common\inc;..\..\interface \

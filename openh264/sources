@@ -1,0 +1,37 @@
+
+!IF "$(BSP_CODEC_OPENH264)" == ""
+SKIPBUILD=1
+!ELSE
+CDEFINES= $(CDEFINES) -DBSP_CODEC_OPENH264
+!ENDIF
+
+TARGETNAME=OPENH264
+RELEASETYPE=PLATFORM
+TARGETTYPE=DYNLINK
+
+SOURCELIBS=\
+	$(_SYSGENSDKROOT)\lib\$(_CPUINDPATH)\coredll.lib \
+	$(_SYSGENDDKROOT)\lib\$(_CPUINDPATH)\oh264_common.lib  \
+	$(_SYSGENDDKROOT)\lib\$(_CPUINDPATH)\oh264_dec_core.lib  \
+	$(_SYSGENDDKROOT)\lib\$(_CPUINDPATH)\oh264_dec_plus.lib  \
+	$(_SYSGENDDKROOT)\lib\$(_CPUINDPATH)\oh264_enc_core.lib  \
+	$(_SYSGENDDKROOT)\lib\$(_CPUINDPATH)\oh264_enc_plus.lib  \
+	$(_SYSGENDDKROOT)\lib\$(_CPUINDPATH)\oh264_proc_aq.lib  \
+	$(_SYSGENDDKROOT)\lib\$(_CPUINDPATH)\oh264_proc_bd.lib  \
+	$(_SYSGENDDKROOT)\lib\$(_CPUINDPATH)\oh264_proc_common.lib  \
+	$(_SYSGENDDKROOT)\lib\$(_CPUINDPATH)\oh264_proc_ca.lib  \
+	$(_SYSGENDDKROOT)\lib\$(_CPUINDPATH)\oh264_proc_dn.lib  \
+	$(_SYSGENDDKROOT)\lib\$(_CPUINDPATH)\oh264_proc_ds.lib  \
+	$(_SYSGENDDKROOT)\lib\$(_CPUINDPATH)\oh264_proc_ir.lib  \
+	$(_SYSGENDDKROOT)\lib\$(_CPUINDPATH)\oh264_proc_scd.lib  \
+	$(_SYSGENDDKROOT)\lib\$(_CPUINDPATH)\oh264_proc_sd.lib  \
+	$(_SYSGENDDKROOT)\lib\$(_CPUINDPATH)\oh264_proc_vac.lib  \
+
+DEFFILE=openh264.def
+!IF 1
+DLLENTRY=DllEntry
+SOURCES=Entry.cpp
+!ELSE
+DLLENTRY=DllEntryPoint
+!ENDIF
+

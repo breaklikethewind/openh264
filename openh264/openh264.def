@@ -1,0 +1,7 @@
+LIBRARY  OPENH264
+    
+EXPORTS
+    WelsCreateDecoder
+    WelsDestroyDecoder
+    WelsCreateSVCEncoder
+    WelsDestroySVCEncoder
