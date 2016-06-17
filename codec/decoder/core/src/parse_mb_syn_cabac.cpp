@@ -353,6 +353,10 @@ int32_t ParseIntraPredModeChromaCabac (PWelsDecoderContext pCtx, uint8_t uiNeigh
   return ERR_NONE;
 }
 
+// RTI Change
+#ifdef _WIN32_WCE
+#pragma warning( disable : 4244 )
+#endif
 int32_t ParseInterMotionInfoCabac (PWelsDecoderContext pCtx, PWelsNeighAvail pNeighAvail, uint8_t* pNonZeroCount,
                                    int16_t pMotionVector[LIST_A][30][MV_A], int16_t pMvdCache[LIST_A][30][MV_A], int8_t pRefIndex[LIST_A][30]) {
   PSlice pSlice				= &pCtx->pCurDqLayer->sLayerInfo.sSliceInLayer;

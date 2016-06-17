@@ -108,8 +108,8 @@ SScreenBlockFeatureStorage* pScreenBlockFeatureStorage;
 
 // RTI change; needed explicit data type cast for assignments
       uiTemporalId	= (uint8_t)-1;
-        uiSpatialId		= (uint8_t)uiTemporalId;
-        iLongTermPicNum = (int32_t)uiSpatialId;
+        uiSpatialId		= (uint8_t)-1;
+        iLongTermPicNum = (uint8_t)-1;
 
       bIsLongRef	= false;
       uiRecieveConfirmed = RECIEVE_FAILED;

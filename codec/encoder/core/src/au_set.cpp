@@ -74,6 +74,19 @@ static inline int32_t WelsCheckLevelLimitation (const SWelsSPS* kpSps, const SLe
 
 }
 
+int32_t WelsAdjustLevel (SSpatialLayerConfig* pSpatialLayer) {
+  int32_t iLevel = (int32_t)pSpatialLayer->uiLevelIdc;
+  int32_t iMaxBitrate = pSpatialLayer->iMaxSpatialBitrate;
+  while (iLevel <= LEVEL_5_2) {
+    int32_t iLevelMaxBitrate = g_ksLevelLimits[pSpatialLayer->uiLevelIdc - 1].uiMaxBR * CpbBrNalFactor;
+    if (iMaxBitrate < iLevelMaxBitrate) {
+      pSpatialLayer->uiLevelIdc = (ELevelIdc)iLevel;
+      return 0;
+    }
+    iLevel++;
+  }
+  return 1;
+}
 int32_t WelsCheckRefFrameLimitation (SLogContext* pLogCtx, SWelsSvcCodingParam* pParam) {
   int32_t i = 0;
   int32_t iRefFrame = 1;
@@ -86,8 +99,11 @@ int32_t WelsCheckRefFrameLimitation (SLogContext* pLogCtx, SWelsSvcCodingParam* 
       WelsLog (pLogCtx, WELS_LOG_WARNING, "change level to level5.0");
     }
     iRefFrame = g_ksLevelLimits[pSpatialLayer->uiLevelIdc - 1].uiMaxDPBMbs / uiPicInMBs;
-    if (iRefFrame < pParam->iMaxNumRefFrame)
+    if (iRefFrame < pParam->iMaxNumRefFrame) {
       pParam->iMaxNumRefFrame = iRefFrame;
+      if (pParam->iMaxNumRefFrame < pParam->iNumRefFrame)
+        pParam->iNumRefFrame = pParam->iMaxNumRefFrame;
+    }
     if (pParam->iMaxNumRefFrame < 1) {
       pParam->iMaxNumRefFrame = 1;
       WelsLog (pLogCtx, WELS_LOG_ERROR, "error Level setting (%d)", pSpatialLayer->uiLevelIdc);
@@ -97,14 +113,14 @@ int32_t WelsCheckRefFrameLimitation (SLogContext* pLogCtx, SWelsSvcCodingParam* 
 
   return ENC_RETURN_SUCCESS;
 }
-static inline int32_t WelsGetLevelIdc (const SWelsSPS* kpSps, float fFrameRate, int32_t iTargetBitRate) {
+static inline ELevelIdc WelsGetLevelIdc (const SWelsSPS* kpSps, float fFrameRate, int32_t iTargetBitRate) {
   int32_t iOrder;
   for (iOrder = 0; iOrder < LEVEL_NUMBER; iOrder++) {
     if (WelsCheckLevelLimitation (kpSps, & (g_ksLevelLimits[iOrder]), fFrameRate, iTargetBitRate)) {
-      return (int32_t) (g_ksLevelLimits[iOrder].uiLevelIdc);
+      return (g_ksLevelLimits[iOrder].uiLevelIdc);
     }
   }
-  return 51; //final decision: select the biggest level
+  return LEVEL_5_1; //final decision: select the biggest level
 }
 
 
@@ -266,7 +282,7 @@ int32_t WelsWritePpsSyntax (SWelsPPS* pPps, SBitStringAux* pBitStringAux, SParaS
   }
 #endif
 
-  BsWriteOneBit (pLocalBitStringAux, false/*pPps->entropy_coding_mode_flag*/);
+  BsWriteOneBit (pLocalBitStringAux, pPps->bEntropyCodingModeFlag);
   BsWriteOneBit (pLocalBitStringAux, false/*pPps->bPicOrderPresentFlag*/);
 
 #ifdef DISABLE_FMO_FEATURE
@@ -347,9 +363,11 @@ static inline bool WelsGetPaddingOffset (int32_t iActualWidth, int32_t iActualHe
 }
 int32_t WelsInitSps (SWelsSPS* pSps, SSpatialLayerConfig* pLayerParam, SSpatialLayerInternal* pLayerParamInternal,
                      const uint32_t kuiIntraPeriod, const int32_t kiNumRefFrame,
-                     const uint32_t kuiSpsId, const bool kbEnableFrameCropping, bool bEnableRc) {
+                     const uint32_t kuiSpsId, const bool kbEnableFrameCropping, bool bEnableRc,
+                     const int32_t kiDlayerCount) {
   memset (pSps, 0, sizeof (SWelsSPS));
 
+  ELevelIdc uiLevel = LEVEL_5_2;
   pSps->uiSpsId		= kuiSpsId;
   pSps->iMbWidth	= (pLayerParam->iVideoWidth + 15) >> 4;
   pSps->iMbHeight	= (pLayerParam->iVideoHeight + 15) >> 4;
@@ -371,18 +389,33 @@ int32_t WelsInitSps (SWelsSPS* pSps, SSpatialLayerConfig* pLayerParam, SSpatialL
   pSps->uiProfileIdc	= pLayerParam->uiProfileIdc ? pLayerParam->uiProfileIdc : PRO_BASELINE;
 
   if (bEnableRc)  //fixed QP condition
-    pSps->iLevelIdc	= WelsGetLevelIdc (pSps, pLayerParamInternal->fOutputFrameRate, pLayerParam->iSpatialBitrate);
+    uiLevel	= WelsGetLevelIdc (pSps, pLayerParamInternal->fOutputFrameRate, pLayerParam->iSpatialBitrate);
   else
-    pSps->iLevelIdc  = WelsGetLevelIdc (pSps, pLayerParamInternal->fOutputFrameRate,
-                                        0); // Set tar_br = 0 to remove the bitrate constraint; a better way is to set actual tar_br as 0
+    uiLevel  = WelsGetLevelIdc (pSps, pLayerParamInternal->fOutputFrameRate,
+                                0); // Set tar_br = 0 to remove the bitrate constraint; a better way is to set actual tar_br as 0
 
+  if (pLayerParam->uiProfileIdc == PRO_BASELINE) {
+    pSps->bConstraintSet0Flag = true;
+  }
+  if (pLayerParam->uiProfileIdc <= PRO_MAIN) {
+    pSps->bConstraintSet1Flag = true;
+  }
+  if (kiDlayerCount > 1) {
+    pSps->bConstraintSet2Flag = true;
+  }
+
+  //update level
   //for Scalable Baseline, Scalable High, and Scalable High Intra profiles.If level_idc is equal to 9, the indicated level is level 1b.
   //for the Baseline, Constrained Baseline, Main, and Extended profiles,If level_idc is equal to 11 and constraint_set3_flag is equal to 1, the indicated level is level 1b.
-  if ((pSps->iLevelIdc == 9) &&
+  if ((uiLevel == LEVEL_1_B) &&
       ((pSps->uiProfileIdc == PRO_BASELINE) || (pSps->uiProfileIdc == PRO_MAIN) || (pSps->uiProfileIdc == PRO_EXTENDED))) {
-    pSps->iLevelIdc = 11;
+    uiLevel = LEVEL_1_1;
     pSps->bConstraintSet3Flag = true;
   }
+  if (pLayerParam->uiLevelIdc < uiLevel) {
+    pLayerParam->uiLevelIdc = uiLevel;
+  }
+  pSps->iLevelIdc = g_kuiLevelMaps[pLayerParam->uiLevelIdc - 1];
   return 0;
 }
 
@@ -396,7 +429,7 @@ int32_t WelsInitSubsetSps (SSubsetSps* pSubsetSps, SSpatialLayerConfig* pLayerPa
   memset (pSubsetSps, 0, sizeof (SSubsetSps));
 
   WelsInitSps (pSps, pLayerParam, pLayerParamInternal, kuiIntraPeriod, kiNumRefFrame, kuiSpsId, kbEnableFrameCropping,
-               bEnableRc);
+               bEnableRc, 1);
 
   pSps->uiProfileIdc	= (pLayerParam->uiProfileIdc >= PRO_SCALABLE_BASELINE) ? pLayerParam->uiProfileIdc :
                         PRO_SCALABLE_BASELINE;
@@ -414,7 +447,8 @@ int32_t WelsInitPps (SWelsPPS* pPps,
                      SSubsetSps* pSubsetSps,
                      const uint32_t kuiPpsId,
                      const bool kbDeblockingFilterPresentFlag,
-                     const bool kbUsingSubsetSps) {
+                     const bool kbUsingSubsetSps,
+                     const bool kbEntropyCodingModeFlag) {
   SWelsSPS* pUsedSps = NULL;
   if (pPps == NULL || (pSps == NULL && pSubsetSps == NULL))
     return 1;
@@ -433,6 +467,7 @@ int32_t WelsInitPps (SWelsPPS* pPps,
   /* fill picture parameter set syntax */
   pPps->iPpsId		= kuiPpsId;
   pPps->iSpsId		= pUsedSps->uiSpsId;
+  pPps->bEntropyCodingModeFlag = kbEntropyCodingModeFlag;
 #if !defined(DISABLE_FMO_FEATURE)
   pPps->uiNumSliceGroups =  1;	//param->qos_param.sliceGroupCount;
   if (pPps->uiNumSliceGroups > 1) {

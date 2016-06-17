@@ -1,4 +1,4 @@
-// CodecRTComponent.cpp
+﻿// CodecRTComponent.cpp
 #include <string.h>
 #include <iostream>
 #include "typedefs.h"

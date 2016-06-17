@@ -1,4 +1,4 @@
-using CodecApp.Resources;
+﻿using CodecApp.Resources;
 
 namespace CodecApp
 {

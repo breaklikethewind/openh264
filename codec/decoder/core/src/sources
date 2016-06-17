@@ -34,6 +34,8 @@ SOURCES= \
     rec_mb.cpp \
     mem_align.cpp \
     mc.cpp \
+    cabac_decoder.cpp \
+    parse_mb_syn_cabac.cpp \
 
 
 !IF "$(BSP_NEON)" != ""

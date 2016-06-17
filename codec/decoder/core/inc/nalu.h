@@ -58,6 +58,7 @@ union {
   SPrefixNalUnit	sPrefixNal;
 } sNalData;
 
+unsigned long long uiTimeStamp;
 } SNalUnit, *PNalUnit;
 
 ///////////////////////////////////ACCESS Unit level///////////////////////////////////

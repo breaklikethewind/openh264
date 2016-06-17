@@ -42,6 +42,8 @@ SOURCES= \
     wels_preprocess.cpp \
     mc.cpp \
     memory_align.cpp \
+    set_mb_syn_cabac.cpp \
+    svc_set_mb_syn_cabac.cpp \
 
 
 !IF "$(BSP_NEON)" != ""

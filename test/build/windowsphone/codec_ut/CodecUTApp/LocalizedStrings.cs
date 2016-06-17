@@ -1,4 +1,4 @@
-using CodecUTApp.Resources;
+﻿using CodecUTApp.Resources;
 
 namespace CodecUTApp
 {

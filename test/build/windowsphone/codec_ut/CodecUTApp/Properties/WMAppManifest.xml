@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Deployment xmlns="http://schemas.microsoft.com/windowsphone/2014/deployment" AppPlatformVersion="8.1">
   <DefaultLanguage xmlns="" code="en-US" />
   <App xmlns="" ProductID="{37167e8c-fb5e-4000-b00b-99af2e01d9b7}" Title="CodecUTApp" RuntimeType="Silverlight" Version="1.0.0.0" Genre="apps.normal" Author="CodecUTApp author" Description="Sample description" Publisher="CodecUTApp" PublisherID="{f32659ce-dc17-4ac4-869f-1bb44d5172c4}">

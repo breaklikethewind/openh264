@@ -34,6 +34,10 @@
 namespace WelsDec {
 static const int16_t g_kMvdBinPos2Ctx [8] = {0, 1, 2, 3, 3, 3, 3, 3};
 
+// RTI Change
+#ifdef _WIN32_WCE
+#pragma warning( disable : 4244 )
+#endif
 void WelsCabacGlobalInit (PWelsDecoderContext pCtx) {
   for (int32_t iModel = 0; iModel < 4; iModel++) {
     for (int32_t iQp = 0; iQp <= WELS_QP_MAX; iQp++)
@@ -285,6 +289,10 @@ int32_t DecodeExpBypassCabac (PWelsCabacDecEngine pDecEngine, int32_t iCount, ui
   return ERR_NONE;
 }
 
+// RTI Change
+#ifdef _WIN32_WCE
+#pragma warning( disable : 4702 )
+#endif
 uint32_t DecodeUEGLevelCabac (PWelsCabacDecEngine pDecEngine, PWelsCabacCtx pBinCtx, uint32_t& uiCode) {
   uiCode = 0;
   WELS_READ_VERIFY (DecodeBinCabac (pDecEngine, pBinCtx, uiCode));

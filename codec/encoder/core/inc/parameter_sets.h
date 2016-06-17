@@ -148,6 +148,7 @@ uint8_t		uiChromaQpIndexOffset;
 
 //	bool		bPicOrderPresentFlag;
 
+bool    bEntropyCodingModeFlag;
 bool		bDeblockingFilterControlPresentFlag;
 
 //	bool		bConstainedIntraPredFlag;

@@ -37,14 +37,17 @@
 #include "typedefs.h"
 #include "macros.h"
 
+#include "codec_app_def.h"
 
 
 namespace WelsCommon {
 /*common use table*/
 
+#define  CTX_NA 0
+#define  WELS_CONTEXT_COUNT 460
 #define LEVEL_NUMBER 17
 typedef struct TagLevelLimits {
-  uint8_t uiLevelIdc;  // level idc
+  ELevelIdc uiLevelIdc;  // level idc
   uint32_t uiMaxMBPS; // Max macroblock processing rate(MB/s)
   uint32_t uiMaxFS;   // Max frame sizea(MBs)
   uint32_t uiMaxDPBMbs;// Max decoded picture buffer size(MBs)
@@ -56,7 +59,9 @@ typedef struct TagLevelLimits {
   int16_t iMaxMvsPer2Mb; // Max number of motion vectors per two consecutive MBs
 } SLevelLimits;
 
+#define CpbBrNalFactor 1200  //baseline,main,and extended profiles.
 extern const SLevelLimits g_ksLevelLimits[LEVEL_NUMBER];
+extern const uint32_t g_kuiLevelMaps[LEVEL_NUMBER];
 extern const uint8_t g_kuiMbCountScan4Idx[24];
 extern const uint8_t g_kuiCache30ScanIdx[16];
 extern const uint8_t g_kuiCache48CountScan4Idx[24];
@@ -64,6 +69,9 @@ extern const uint8_t g_kuiCache48CountScan4Idx[24];
 extern const  ALIGNED_DECLARE (uint16_t, g_kuiDequantCoeff[52][8], 16);
 extern const uint8_t g_kuiChromaQpTable[52];
 
+extern const uint8_t g_kuiCabacRangeLps[64][4];
+extern const int8_t g_kiCabacGlobalContextIdx[WELS_CONTEXT_COUNT][4][2];
+extern const uint8_t g_kuiStateTransTable[64][2];
 /*
  *	NAL Unit Type (5 Bits)
  */
