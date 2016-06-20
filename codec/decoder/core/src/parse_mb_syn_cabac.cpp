@@ -389,7 +389,8 @@ int32_t ParseInterMotionInfoCabac (PWelsDecoderContext pCtx, PWelsNeighAvail pNe
         return ERR_INFO_INVALID_REF_INDEX;
       }
     }
-    pCtx->bMbRefConcealed = pCtx->bRPLRError || pCtx->bMbRefConcealed || !(ppRefPic[iRef[0]]&&ppRefPic[iRef[0]]->bIsComplete);
+    pCtx->bMbRefConcealed = pCtx->bRPLRError || pCtx->bMbRefConcealed || ! (ppRefPic[iRef[0]]
+                            && ppRefPic[iRef[0]]->bIsComplete);
     PredMv (pMotionVector, pRefIndex, 0, 4, iRef[0], pMv);
     WELS_READ_VERIFY (ParseMvdInfoCabac (pCtx, pNeighAvail, pRefIndex, pMvdCache, iPartIdx, LIST_0, 0, pMvd[0]));
     WELS_READ_VERIFY (ParseMvdInfoCabac (pCtx, pNeighAvail, pRefIndex, pMvdCache, iPartIdx, LIST_0, 1, pMvd[1]));
@@ -414,7 +415,8 @@ int32_t ParseInterMotionInfoCabac (PWelsDecoderContext pCtx, PWelsNeighAvail pNe
           return ERR_INFO_INVALID_REF_INDEX;
         }
       }
-      pCtx->bMbRefConcealed = pCtx->bRPLRError || pCtx->bMbRefConcealed || !(ppRefPic[iRef[i]]&&ppRefPic[iRef[i]]->bIsComplete);
+      pCtx->bMbRefConcealed = pCtx->bRPLRError || pCtx->bMbRefConcealed || ! (ppRefPic[iRef[i]]
+                              && ppRefPic[iRef[i]]->bIsComplete);
       UpdateP16x8RefIdxCabac (pCurDqLayer, pRefIndex, iPartIdx, iRef[i], LIST_0);
     }
     for (i = 0; i < 2; i++) {
@@ -443,7 +445,8 @@ int32_t ParseInterMotionInfoCabac (PWelsDecoderContext pCtx, PWelsNeighAvail pNe
           return ERR_INFO_INVALID_REF_INDEX;
         }
       }
-      pCtx->bMbRefConcealed = pCtx->bRPLRError || pCtx->bMbRefConcealed || !(ppRefPic[iRef[i]]&&ppRefPic[iRef[i]]->bIsComplete);
+      pCtx->bMbRefConcealed = pCtx->bRPLRError || pCtx->bMbRefConcealed || ! (ppRefPic[iRef[i]]
+                              && ppRefPic[iRef[i]]->bIsComplete);
       UpdateP8x16RefIdxCabac (pCurDqLayer, pRefIndex, iPartIdx, iRef[i], LIST_0);
     }
     for (i = 0; i < 2; i++) {
@@ -487,7 +490,8 @@ int32_t ParseInterMotionInfoCabac (PWelsDecoderContext pCtx, PWelsNeighAvail pNe
           return ERR_INFO_INVALID_REF_INDEX;
         }
       }
-      pCtx->bMbRefConcealed = pCtx->bRPLRError || pCtx->bMbRefConcealed || !(ppRefPic[pRefIdx[i]]&&ppRefPic[pRefIdx[i]]->bIsComplete);
+      pCtx->bMbRefConcealed = pCtx->bRPLRError || pCtx->bMbRefConcealed || ! (ppRefPic[pRefIdx[i]]
+                              && ppRefPic[pRefIdx[i]]->bIsComplete);
       UpdateP8x8RefIdxCabac (pCurDqLayer, pRefIndex, iIdx8, pRefIdx[i], LIST_0);
     }
     //mv
@@ -668,6 +672,8 @@ int32_t ParseCbpInfoCabac (PWelsDecoderContext pCtx, PWelsNeighAvail pNeighAvail
   WELS_READ_VERIFY (DecodeBinCabac (pCtx->pCabacDecEngine, pCtx->pCabacCtx + NEW_CTX_OFFSET_CBP + iCtxInc, pCbpBit[3]));
   if (pCbpBit[3])
     uiCbp += 0x08;
+  if (pCtx->pSps->uiChromaFormatIdc == 0)//monochroma
+    return ERR_NONE;
 
   //Chroma: bit by bit
   iIdxB = pNeighAvail->iTopAvail  && (pNeighAvail->iTopType  == MB_TYPE_INTRA_PCM || (pNeighAvail->iTopCbp  >> 4));
@@ -825,10 +831,13 @@ int32_t ParseResidualBlockCabac (PWelsNeighAvail pNeighAvail, uint8_t* pNonZeroC
                                  const uint8_t* pScanTable, int32_t iResProperty, short* sTCoeff, /*int mb_mode*/ uint8_t uiQp,
                                  PWelsDecoderContext pCtx) {
   int32_t iCurNzCacheIdx;
-  const uint16_t* pDeQuantMul = g_kuiDequantCoeff[uiQp];
   uint32_t uiTotalCoeffNum = 0;
   uint32_t uiCbpBit;
   int32_t pSignificantMap[16] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+  int32_t iMbResProperty = 0;
+  GetMbResProperty (&iMbResProperty, &iResProperty, false);
+  const uint16_t* pDeQuantMul = (pCtx->bUseScalingList) ? pCtx->pDequant_coeff4x4[iMbResProperty][uiQp] :
+                                g_kuiDequantCoeff[uiQp];
 
   WELS_READ_VERIFY (ParseCbfInfoCabac (pNeighAvail, pNonZeroCountCache, iIndex, iResProperty, pCtx, uiCbpBit));
   if (uiCbpBit) { //has coeff
@@ -851,13 +860,15 @@ int32_t ParseResidualBlockCabac (PWelsNeighAvail pNeighAvail, uint8_t* pNonZeroC
   } else if (iResProperty == CHROMA_DC_U || iResProperty == CHROMA_DC_V) {
     do {
       if (pSignificantMap[j] != 0)
-        sTCoeff[pScanTable[j]] = pSignificantMap[j] * pDeQuantMul[0];
+        sTCoeff[pScanTable[j]] = pCtx->bUseScalingList ? (pSignificantMap[j] * pDeQuantMul[0]) >> 4 :
+                                 (pSignificantMap[j] * pDeQuantMul[0]);
       ++j;
     } while (j < 16);
   } else { //luma ac, chroma ac
     do {
       if (pSignificantMap[j] != 0)
-        sTCoeff[pScanTable[j]] = pSignificantMap[j] * pDeQuantMul[pScanTable[j] & 0x07];
+        sTCoeff[pScanTable[j]] = pCtx->bUseScalingList ? (pSignificantMap[j] * pDeQuantMul[pScanTable[j]] >> 4) :
+                                 pSignificantMap[j] * pDeQuantMul[pScanTable[j] & 0x07];
       ++j;
     } while (j < 16);
   }
@@ -910,7 +921,7 @@ int32_t ParseIPCMInfoCabac (PWelsDecoderContext pCtx) {
   pBsAux->pCurBuf += 384;
 
   pCurLayer->pLumaQp[iMbXy] = 0;
-  pCurLayer->pChromaQp[iMbXy] = 0;
+  pCurLayer->pChromaQp[iMbXy][0] = pCurLayer->pChromaQp[iMbXy][1] = 0;
   memset (pCurLayer->pNzc[iMbXy], 16, sizeof (pCurLayer->pNzc[iMbXy]));
 
   //step 4: cabac engine init

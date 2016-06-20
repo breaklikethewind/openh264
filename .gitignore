@@ -49,7 +49,8 @@ testbin/test.yuv
 *.pc
 
 # RTI additions
-*.log
 *.scc
+*.log
 obj/
+
 

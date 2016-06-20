@@ -75,7 +75,8 @@ void GomValidCheck (const int32_t kiMbWidth, const int32_t kiMbHeight, int32_t* 
  * \param	para		SWelsSvcCodingParam*
  * \return	successful - 0; otherwise none 0 for failed
  */
-int32_t WelsInitEncoderExt (sWelsEncCtx** ppCtx, SWelsSvcCodingParam* pPara, SLogContext* pLogCtx);
+int32_t WelsInitEncoderExt (sWelsEncCtx** ppCtx, SWelsSvcCodingParam* pPara, SLogContext* pLogCtx,
+                            SExistingParasetList* pExistingParasetList);
 
 /*!
  * \brief	uninitialize Wels encoder core library
@@ -114,6 +115,9 @@ int32_t WelsEncoderApplyBitVaryRang(SLogContext* pLogCtx, SWelsSvcCodingParam* p
 int32_t WelsEncoderApplyLTR (SLogContext* pLogCtx, sWelsEncCtx** ppCtx, SLTRConfig* pLTRValue);
 int32_t FilterLTRRecoveryRequest (sWelsEncCtx* pCtx, SLTRRecoverRequest* pLTRRecoverRequest);
 
+void CheckProfileSetting (SLogContext* pLogCtx,SWelsSvcCodingParam* pParam,int32_t iLayer, EProfileIdc uiProfileIdc);
+void CheckLevelSetting (SLogContext* pLogCtx,SWelsSvcCodingParam* pParam,int32_t iLayer, ELevelIdc uiLevelIdc);
+void CheckReferenceNumSetting (SLogContext* pLogCtx,  SWelsSvcCodingParam* pParam,int32_t iNumRef);
 void FilterLTRMarkingFeedback (sWelsEncCtx* pCtx, SLTRMarkingFeedback* pLTRMarkingFeedback);
 }
 

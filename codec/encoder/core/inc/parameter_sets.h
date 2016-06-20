@@ -68,14 +68,14 @@ uint8_t		iLevelIdc;
 //	uint8_t		uiBitDepthChroma;		//=8
 /* TO BE CONTINUE: POC type 1 */
 //	bool		bDeltaPicOrderAlwaysZeroFlag;
-//	bool		bGapsInFrameNumValueAllowedFlag;	//=true
+bool		bGapsInFrameNumValueAllowedFlag;
 
 //	bool		bFrameMbsOnlyFlag;
 //	bool		bMbaffFlag;	// MB Adapative Frame Field
 //	bool		bDirect8x8InferenceFlag;
 bool		bFrameCroppingFlag;
 
-//	bool		bVuiParamPresentFlag;
+bool		bVuiParamPresentFlag;
 //	bool		bTimingInfoPresentFlag;
 //	bool		bFixedFrameRateFlag;
 

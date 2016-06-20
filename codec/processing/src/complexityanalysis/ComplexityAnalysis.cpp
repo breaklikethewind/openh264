@@ -243,6 +243,7 @@ void CComplexityAnalysis::AnalyzeGomComplexityViaVar (SPixMap* pSrcPixMap, SPixM
   SVAACalcResult* pVaaCalcResults = m_sComplexityAnalysisParam.pCalcResult;
   int32_t*  pGomComplexity = (int32_t*)m_sComplexityAnalysisParam.pGomComplexity;
 
+  uint32_t  uiFrameSad = 0;
 
   uint32_t uiSampleSum = 0, uiSquareSum = 0;
 
@@ -271,7 +272,9 @@ void CComplexityAnalysis::AnalyzeGomComplexityViaVar (SPixMap* pSrcPixMap, SPixM
     } while (--iGomMbRowNum);
 
     pGomComplexity[j] = uiSquareSum - (uiSampleSum * uiSampleSum / iGomSampleNum);
+    uiFrameSad += pGomComplexity[j];
   }
+  m_sComplexityAnalysisParam.iFrameComplexity = uiFrameSad;
 }
 
 
@@ -326,7 +329,7 @@ EResult CComplexityAnalysisScreen::Process (int32_t nType, SPixMap* pSrc, SPixMa
   } else if (!bScrollFlag || ((iScrollMvX == 0) && (iScrollMvY == 0))) {
     GomComplexityAnalysisInter (pSrc, pRef, 0);
   } else {
-    GomComplexityAnalysisInter (pSrc, pRef, 1);;
+    GomComplexityAnalysisInter (pSrc, pRef, 1);
   }
 
   return RET_SUCCESS;

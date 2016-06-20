@@ -83,7 +83,7 @@ class DecodeEncodeTest : public ::testing::TestWithParam<DecodeEncodeFileParam>,
         break;
       }
     }
-    return buf_.PopFront (static_cast<uint8_t*> (ptr), len);
+    return (int) buf_.PopFront (static_cast<uint8_t*> (ptr), len);
   }
 
  protected:
@@ -91,7 +91,7 @@ class DecodeEncodeTest : public ::testing::TestWithParam<DecodeEncodeFileParam>,
   BufferedData buf_;
 };
 
-void DecEncFileParamToParamExt (DecodeEncodeFileParam * pDecEncFileParam, SEncParamExt* pEnxParamExt) {
+void DecEncFileParamToParamExt (DecodeEncodeFileParam* pDecEncFileParam, SEncParamExt* pEnxParamExt) {
   ASSERT_TRUE (NULL != pDecEncFileParam && NULL != pEnxParamExt);
 
   pEnxParamExt->iPicWidth      = pDecEncFileParam->width;
@@ -107,14 +107,14 @@ void DecEncFileParamToParamExt (DecodeEncodeFileParam * pDecEncFileParam, SEncPa
   pEnxParamExt->iEntropyCodingModeFlag    = 0;
 
   for (int i = 0; i < pEnxParamExt->iSpatialLayerNum; i++) {
-     pEnxParamExt->sSpatialLayers[i].sSliceCfg.uiSliceMode = SM_SINGLE_SLICE;
+    pEnxParamExt->sSpatialLayers[i].sSliceCfg.uiSliceMode = SM_SINGLE_SLICE;
   }
 
 }
 TEST_P (DecodeEncodeTest, CompareOutput) {
   DecodeEncodeFileParam p = GetParam();
   SEncParamExt  EnxParamExt;
-  DecEncFileParamToParamExt(&p,&EnxParamExt);
+  DecEncFileParamToParamExt (&p, &EnxParamExt);
 
 #if defined(ANDROID_NDK)
   std::string filename = std::string ("/sdcard/") + p.fileName;
@@ -130,8 +130,8 @@ TEST_P (DecodeEncodeTest, CompareOutput) {
   }
 }
 static const DecodeEncodeFileParam kFileParamArray[] = {
-  {"res/test_vd_1d.264", "3fee3297d9c69aa8726498fdacba87f1e12100b0", 320, 192, 12.0f},
-  {"res/test_vd_rc.264", "556ac0894af7bc93a27b3f0876184e0171288038", 320, 192, 12.0f},
+  {"res/test_vd_1d.264", "9d4d682679a0746edda2824687f00ba6db91a2a8", 320, 192, 12.0f},
+  {"res/test_vd_rc.264", "23dab419a16c6e894518ca93444666e9336aef63", 320, 192, 12.0f},
 };
 
 

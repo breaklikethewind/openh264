@@ -28,12 +28,13 @@ JNIEXPORT void JNICALL Java_com_wels_enc_WelsEncTest_DoEncoderAutoTest
   EncMain(sizeof(argv)/sizeof(argv[0]),(char**)&argv[0]);
   LOGI ("End to run JNI module!+++");
 }
+
 JNIEXPORT void JNICALL Java_com_wels_enc_WelsEncTest_DoEncoderTest
 (JNIEnv* env, jobject thiz, jstring jsFileNameIn) {
   /**************** Add the native codes/API *****************/
   char* argv[2];
   int  argc = 2;
-  argv[0] = (char*) ("decConsole.exe");
+  argv[0] = (char*) ("encConsole.exe");
   argv[1] = (char*) ((*env).GetStringUTFChars (jsFileNameIn, NULL));
   LOGI ("Start to run JNI module!+++");
   EncMain (argc, argv);
