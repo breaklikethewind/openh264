@@ -30,7 +30,8 @@
  *
  */
 
-#ifdef HAVE_NEON_AARCH64
+#ifdef  HAVE_NEON_AARCH64
+.text
 #include "arm_arch64_common_macro.S"
 
 //for Luma 16x16

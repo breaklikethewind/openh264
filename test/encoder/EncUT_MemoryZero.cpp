@@ -9,7 +9,7 @@
 #include "wels_func_ptr_def.h"
 #include "../../codec/encoder/core/src/encoder.cpp"
 
-using namespace WelsSVCEnc;
+using namespace WelsEnc;
 #define MEMORYZEROTEST_NUM 1000
 
 TEST (SetMemZeroFunTest, WelsSetMemZero) {
@@ -31,6 +31,7 @@ TEST (SetMemZeroFunTest, WelsSetMemZero) {
     sFuncPtrList.pfSetMemZeroSize64Aligned16	= WelsSetMemZeroAligned64_sse2;	// confirmed_safe_unsafe_usage
   }
 #endif//X86_ASM
+
 #if defined(HAVE_NEON)
   if (uiCpuFlag & WELS_CPU_NEON) {
     sFuncPtrList.pfSetMemZeroSize8	= WelsSetMemZero_neon;
@@ -38,6 +39,7 @@ TEST (SetMemZeroFunTest, WelsSetMemZero) {
     sFuncPtrList.pfSetMemZeroSize64	= WelsSetMemZero_neon;
   }
 #endif
+
 #if defined(HAVE_NEON_AARCH64)
   if (uiCpuFlag & WELS_CPU_NEON) {
     sFuncPtrList.pfSetMemZeroSize8	= WelsSetMemZero_AArch64_neon;
@@ -45,7 +47,9 @@ TEST (SetMemZeroFunTest, WelsSetMemZero) {
     sFuncPtrList.pfSetMemZeroSize64	= WelsSetMemZero_AArch64_neon;
   }
 #endif
+
   ENFORCE_STACK_ALIGN_2D (uint8_t, pInputAlign, 2, 64 * 101, 16)
+
   for (int32_t k = 0; k < MEMORYZEROTEST_NUM; k++) {
     memset (pInputAlign[0], 255, 64 * 101);
     memset (pInputAlign[1], 255, 64 * 101);

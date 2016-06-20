@@ -4,7 +4,7 @@
 #include "codec_app_def.h"
 #include "codec_api.h"
 #include "wels_common_basis.h"
-#include "memory_align.h"
+#include "mem_align.h"
 #include "ls_defines.h"
 
 using namespace WelsDec;
@@ -26,8 +26,6 @@ class DecoderInterfaceTest : public ::testing::Test {
   }
   //Init members
   void Init();
-  //Init valid members
-  void ValidInit();
   //Uninit members
   void Uninit();
   //Mock input data for test
@@ -36,8 +34,8 @@ class DecoderInterfaceTest : public ::testing::Test {
   void DecoderBs (const char* sFileName);
   //Test Initialize/Uninitialize
   void TestInitUninit();
-  //Test parse only API
-  void TestParseOnlyAPI();
+  //DECODER_OPTION_DATAFORMAT
+  void TestDataFormat();
   //DECODER_OPTION_END_OF_STREAM
   void TestEndOfStream();
   //DECODER_OPTION_VCL_NAL
@@ -70,7 +68,6 @@ class DecoderInterfaceTest : public ::testing::Test {
   ISVCDecoder* m_pDec;
   SDecodingParam m_sDecParam;
   SBufferInfo m_sBufferInfo;
-  SParserBsInfo m_sParserBsInfo;
   uint8_t* m_pData[3];
   unsigned char m_szBuffer[BUF_SIZE]; //for mocking packet
   int m_iBufLength; //record the valid data in m_szBuffer
@@ -79,12 +76,12 @@ class DecoderInterfaceTest : public ::testing::Test {
 //Init members
 void DecoderInterfaceTest::Init() {
   memset (&m_sBufferInfo, 0, sizeof (SBufferInfo));
-  memset (&m_sParserBsInfo, 0, sizeof (SParserBsInfo));
   memset (&m_sDecParam, 0, sizeof (SDecodingParam));
   m_sDecParam.pFileNameRestructed = NULL;
+  m_sDecParam.eOutputColorFormat = (EVideoFormatType) (rand() % 100);
   m_sDecParam.uiCpuLoad = rand() % 100;
   m_sDecParam.uiTargetDqLayer = rand() % 100;
-  m_sDecParam.eEcActiveIdc = (ERROR_CON_IDC) (rand() & 7);
+  m_sDecParam.eEcActiveIdc = (ERROR_CON_IDC) (rand() & 3);
   m_sDecParam.sVideoProperty.size = sizeof (SVideoProperty);
   m_sDecParam.sVideoProperty.eVideoBsType = (VIDEO_BITSTREAM_TYPE) (rand() % 3);
 
@@ -93,25 +90,11 @@ void DecoderInterfaceTest::Init() {
   m_szBuffer[3] = 1;
   m_iBufLength = 4;
   CM_RETURN eRet = (CM_RETURN) m_pDec->Initialize (&m_sDecParam);
-  ASSERT_EQ (eRet, cmResultSuccess);
-}
-
-void DecoderInterfaceTest::ValidInit() {
-  memset (&m_sBufferInfo, 0, sizeof (SBufferInfo));
-  memset (&m_sDecParam, 0, sizeof (SDecodingParam));
-  m_sDecParam.pFileNameRestructed = NULL;
-  m_sDecParam.uiCpuLoad = 1;
-  m_sDecParam.uiTargetDqLayer = 1;
-  m_sDecParam.eEcActiveIdc = (ERROR_CON_IDC) (rand() & 7);
-  m_sDecParam.sVideoProperty.size = sizeof (SVideoProperty);
-  m_sDecParam.sVideoProperty.eVideoBsType = VIDEO_BITSTREAM_DEFAULT;
-
-  m_pData[0] = m_pData[1] = m_pData[2] = NULL;
-  m_szBuffer[0] = m_szBuffer[1] = m_szBuffer[2] = 0;
-  m_szBuffer[3] = 1;
-  m_iBufLength = 4;
-  CM_RETURN eRet = (CM_RETURN) m_pDec->Initialize (&m_sDecParam);
-  ASSERT_EQ (eRet, cmResultSuccess);
+  if ((m_sDecParam.eOutputColorFormat != videoFormatI420) &&
+      (m_sDecParam.eOutputColorFormat != videoFormatInternal))
+    ASSERT_EQ (eRet, cmUnsupportedData);
+  else
+    ASSERT_EQ (eRet, cmResultSuccess);
 }
 
 void DecoderInterfaceTest::Uninit() {
@@ -120,7 +103,6 @@ void DecoderInterfaceTest::Uninit() {
     ASSERT_EQ (eRet, cmResultSuccess);
   }
   memset (&m_sDecParam, 0, sizeof (SDecodingParam));
-  memset (&m_sParserBsInfo, 0, sizeof (SParserBsInfo));
   memset (&m_sBufferInfo, 0, sizeof (SBufferInfo));
   m_pData[0] = m_pData[1] = m_pData[2] = NULL;
   m_iBufLength = 0;
@@ -140,9 +122,9 @@ void DecoderInterfaceTest::DecoderBs (const char* sFileName) {
 
 #if defined(ANDROID_NDK)
   std::string filename = std::string ("/sdcard/") + sFileName;
-  ASSERT_TRUE ((pH264File = fopen (filename.c_str(), "rb")) != NULL);
+  ASSERT_TRUE (pH264File = fopen (filename.c_str(), "rb"));
 #else
-  ASSERT_TRUE ((pH264File = fopen (sFileName, "rb")) != NULL);
+  ASSERT_TRUE (pH264File = fopen (sFileName, "rb"));
 #endif
   fseek (pH264File, 0L, SEEK_END);
   iFileSize = (int32_t) ftell (pH264File);
@@ -205,15 +187,16 @@ void DecoderInterfaceTest::MockPacketType (const EWelsNalUnitType eNalUnitType, 
   default:
     m_szBuffer[m_iBufLength++] = 0; //NAL_UNIT_UNSPEC_0
     break;
-  }
-  int iAddLength = iPacketLength - 5; //excluding 0001 and type
-  if (iAddLength > PAYLOAD_SIZE)
-    iAddLength = PAYLOAD_SIZE;
-  for (int i = 0; i < iAddLength; ++i) {
-    m_szBuffer[m_iBufLength++] = rand() % 256;
-  }
-  m_szBuffer[m_iBufLength++] = '\0';
 
+    int iAddLength = iPacketLength - 5; //excluding 0001 and type
+    if (iAddLength > PAYLOAD_SIZE)
+      iAddLength = PAYLOAD_SIZE;
+    for (int i = 0; i < iAddLength; ++i) {
+      m_szBuffer[m_iBufLength++] = rand() % 256;
+    }
+    m_szBuffer[m_iBufLength++] = '\0';
+
+  }
 }
 
 //Test Initialize/Uninitialize
@@ -227,12 +210,12 @@ void DecoderInterfaceTest::TestInitUninit() {
     EXPECT_EQ (eRet, cmInitExpected);
   }
   //Initialize first, can get input color format
-  Init();
+  m_sDecParam.eOutputColorFormat = (EVideoFormatType) 20; //just for test
   m_sDecParam.bParseOnly = false;
   m_pDec->Initialize (&m_sDecParam);
-  eRet = (CM_RETURN) m_pDec->GetOption (DECODER_OPTION_END_OF_STREAM, &iOutput);
+  eRet = (CM_RETURN) m_pDec->GetOption (DECODER_OPTION_DATAFORMAT, &iOutput);
   EXPECT_EQ (eRet, cmResultSuccess);
-  EXPECT_EQ (iOutput, 0);
+  EXPECT_EQ ((int32_t) videoFormatI420, iOutput);
 
   //Uninitialize, no GetOption can be done
   m_pDec->Uninitialize();
@@ -244,85 +227,30 @@ void DecoderInterfaceTest::TestInitUninit() {
   }
 }
 
-//Test parse only API
-void DecoderInterfaceTest::TestParseOnlyAPI() {
-  int iOutput;
-  int iRet;
+//DECODER_OPTION_DATAFORMAT
+void DecoderInterfaceTest::TestDataFormat() {
+  int iTmp = rand();
+  int iOut;
+  CM_RETURN eRet;
 
-  m_pData[0] = m_pData[1] = m_pData[2] = NULL;
-  m_szBuffer[0] = m_szBuffer[1] = m_szBuffer[2] = 0;
-  m_szBuffer[3] = 1;
-  m_iBufLength = 4;
-  MockPacketType (NAL_UNIT_SPS, 12);
+  Init();
 
-  m_pDec->Uninitialize();
+  //invalid input
+  eRet = (CM_RETURN) m_pDec->SetOption (DECODER_OPTION_DATAFORMAT, NULL);
+  EXPECT_EQ (eRet, cmInitParaError);
 
-  //test 1: bParseOnly = true; eEcActiveIdc = 0,1
-  for (int iNum = 0; iNum < 2; ++iNum) { //loop for EC
-    memset (&m_sBufferInfo, 0, sizeof (SBufferInfo));
-    memset (&m_sParserBsInfo, 0, sizeof (SParserBsInfo));
-    memset (&m_sDecParam, 0, sizeof (SDecodingParam));
-    m_sDecParam.pFileNameRestructed = NULL;
-    m_sDecParam.uiCpuLoad = rand() % 100;
-    m_sDecParam.uiTargetDqLayer = -1;
-    m_sDecParam.bParseOnly = true;
-    m_sDecParam.eEcActiveIdc = (ERROR_CON_IDC) iNum;
-    m_sDecParam.sVideoProperty.size = sizeof (SVideoProperty);
-    m_sDecParam.sVideoProperty.eVideoBsType = (VIDEO_BITSTREAM_TYPE) (rand() % 3);
+  //valid input
+  eRet = (CM_RETURN) m_pDec->SetOption (DECODER_OPTION_DATAFORMAT, &iTmp);
+  if ((iTmp != (int32_t) videoFormatI420) && (iTmp != (int32_t) videoFormatInternal))
+    EXPECT_EQ (eRet, cmUnsupportedData);
+  else
+    EXPECT_EQ (eRet, cmResultSuccess);
+  eRet = (CM_RETURN) m_pDec->GetOption (DECODER_OPTION_DATAFORMAT, &iOut);
+  EXPECT_EQ (eRet, cmResultSuccess);
 
-    iRet = m_pDec->Initialize (&m_sDecParam);
-    ASSERT_EQ (iRet, (int32_t) cmResultSuccess);
-    iRet = m_pDec->GetOption (DECODER_OPTION_ERROR_CON_IDC, &iOutput);
-    EXPECT_EQ (iRet, (int32_t) cmResultSuccess);
-    EXPECT_EQ (iOutput, (int32_t) ERROR_CON_DISABLE); //should be 0
-    //call DecodeParser(), correct call
-    iRet = (int32_t) m_pDec->DecodeParser (m_szBuffer, m_iBufLength, &m_sParserBsInfo);
-    EXPECT_EQ (iRet, (int32_t) dsNoParamSets);
-    iRet = m_pDec->GetOption (DECODER_OPTION_ERROR_CON_IDC, &iOutput);
-    EXPECT_EQ (iRet, (int32_t) cmResultSuccess);
-    EXPECT_EQ (iOutput, (int32_t) ERROR_CON_DISABLE); //should be 0
-    //call DecodeFrame2(), incorrect call
-    iRet = (int32_t) m_pDec->DecodeFrame2 (m_szBuffer, m_iBufLength, m_pData, &m_sBufferInfo);
-    EXPECT_EQ (iRet, (int32_t) dsInvalidArgument);
-    iRet = m_pDec->GetOption (DECODER_OPTION_ERROR_CON_IDC, &iOutput);
-    EXPECT_EQ (iRet, (int32_t) cmResultSuccess);
-    EXPECT_EQ (iOutput, (int32_t) ERROR_CON_DISABLE); //should be 0
-    m_pDec->Uninitialize();
-  }
+  EXPECT_EQ (iOut, (int32_t) videoFormatI420);
 
-  //test 2: bParseOnly = false; eEcActiveIdc = 0,1
-  for (int iNum = 0; iNum < 2; ++iNum) { //loop for EC
-    memset (&m_sBufferInfo, 0, sizeof (SBufferInfo));
-    memset (&m_sParserBsInfo, 0, sizeof (SParserBsInfo));
-    memset (&m_sDecParam, 0, sizeof (SDecodingParam));
-    m_sDecParam.pFileNameRestructed = NULL;
-    m_sDecParam.uiCpuLoad = rand() % 100;
-    m_sDecParam.uiTargetDqLayer = -1;
-    m_sDecParam.bParseOnly = false;
-    m_sDecParam.eEcActiveIdc = (ERROR_CON_IDC) iNum;
-    m_sDecParam.sVideoProperty.size = sizeof (SVideoProperty);
-    m_sDecParam.sVideoProperty.eVideoBsType = (VIDEO_BITSTREAM_TYPE) (rand() % 3);
-
-    iRet = m_pDec->Initialize (&m_sDecParam);
-    ASSERT_EQ (iRet, (int32_t) cmResultSuccess);
-    iRet = m_pDec->GetOption (DECODER_OPTION_ERROR_CON_IDC, &iOutput);
-    EXPECT_EQ (iRet, (int32_t) cmResultSuccess);
-    EXPECT_EQ (iOutput, iNum);
-    //call DecodeParser(), incorrect call
-    iRet = (int32_t) m_pDec->DecodeParser (m_szBuffer, m_iBufLength, &m_sParserBsInfo);
-    EXPECT_EQ (iRet, (int32_t) dsInvalidArgument); //error call
-    iRet = m_pDec->GetOption (DECODER_OPTION_ERROR_CON_IDC, &iOutput);
-    EXPECT_EQ (iRet, (int32_t) cmResultSuccess);
-    EXPECT_EQ (iOutput, iNum);
-    //call DecodeFrame2(), correct call
-    iRet = (int32_t) m_pDec->DecodeFrame2 (m_szBuffer, m_iBufLength, m_pData, &m_sBufferInfo);
-    EXPECT_EQ (iRet, (int32_t) dsNoParamSets);
-    iRet = m_pDec->GetOption (DECODER_OPTION_ERROR_CON_IDC, &iOutput);
-    EXPECT_EQ (iRet, (int32_t) cmResultSuccess);
-    EXPECT_EQ (iOutput, iNum);
-    m_pDec->Uninitialize();
-  }
-
+  Uninit();
 }
 
 //DECODER_OPTION_END_OF_STREAM
@@ -330,7 +258,7 @@ void DecoderInterfaceTest::TestEndOfStream() {
   int iTmp, iOut;
   CM_RETURN eRet;
 
-  ValidInit();
+  Init();
 
   //invalid input
   eRet = (CM_RETURN) m_pDec->SetOption (DECODER_OPTION_END_OF_STREAM, NULL);
@@ -343,7 +271,7 @@ void DecoderInterfaceTest::TestEndOfStream() {
     EXPECT_EQ (eRet, cmResultSuccess);
     eRet = (CM_RETURN) m_pDec->GetOption (DECODER_OPTION_END_OF_STREAM, &iOut);
     EXPECT_EQ (eRet, cmResultSuccess);
-    EXPECT_EQ (iOut, iTmp != 0 ? 1 : 0);
+    EXPECT_EQ (iOut, iTmp != 0);
   }
 
   //set false as input
@@ -353,7 +281,7 @@ void DecoderInterfaceTest::TestEndOfStream() {
   eRet = (CM_RETURN) m_pDec->GetOption (DECODER_OPTION_END_OF_STREAM, &iOut);
   EXPECT_EQ (eRet, cmResultSuccess);
 
-  EXPECT_EQ (iOut, 0);
+  EXPECT_EQ (iOut, false);
 
   //set true as input
   iTmp = true;
@@ -362,24 +290,24 @@ void DecoderInterfaceTest::TestEndOfStream() {
   eRet = (CM_RETURN) m_pDec->GetOption (DECODER_OPTION_END_OF_STREAM, &iOut);
   EXPECT_EQ (eRet, cmResultSuccess);
 
-  EXPECT_EQ (iOut, 1);
+  EXPECT_EQ (iOut, true);
 
   //Mock data packet in
   //Test NULL data input for decoder, should be true for EOS
   eRet = (CM_RETURN) m_pDec->DecodeFrame2 (NULL, 0, m_pData, &m_sBufferInfo);
   EXPECT_EQ (eRet, 0); //decode should return OK
   eRet = (CM_RETURN) m_pDec->GetOption (DECODER_OPTION_END_OF_STREAM, &iOut);
-  EXPECT_EQ (iOut, 1); //decoder should have EOS == true
+  EXPECT_EQ (iOut, true); //decoder should have EOS == true
 
   //Test valid data input for decoder, should be false for EOS
   MockPacketType (NAL_UNIT_UNSPEC_0, 50);
   eRet = (CM_RETURN) m_pDec->DecodeFrame2 (m_szBuffer, m_iBufLength, m_pData, &m_sBufferInfo);
   eRet = (CM_RETURN) m_pDec->GetOption (DECODER_OPTION_END_OF_STREAM, &iOut);
-  EXPECT_EQ (iOut, 0); //decoder should have EOS == false
+  EXPECT_EQ (iOut, false); //decoder should have EOS == false
   //Test NULL data input for decoder, should be true for EOS
   eRet = (CM_RETURN) m_pDec->DecodeFrame2 (NULL, 0, m_pData, &m_sBufferInfo);
   eRet = (CM_RETURN) m_pDec->GetOption (DECODER_OPTION_END_OF_STREAM, &iOut);
-  EXPECT_EQ (iOut, 1); //decoder should have EOS == true
+  EXPECT_EQ (iOut, true); //decoder should have EOS == true
 
   Uninit();
 }
@@ -392,7 +320,7 @@ void DecoderInterfaceTest::TestVclNal() {
   int iTmp, iOut;
   CM_RETURN eRet;
 
-  ValidInit();
+  Init();
 
   //Test SetOption
   //VclNal never supports SetOption
@@ -451,33 +379,7 @@ void DecoderInterfaceTest::TestLtrMarkedFrameNum() {
 
 //DECODER_OPTION_ERROR_CON_IDC
 void DecoderInterfaceTest::TestErrorConIdc() {
-  int iTmp, iOut;
-  CM_RETURN eRet;
-
-  Init();
-
-  //Test GetOption
-  //invalid input
-  eRet = (CM_RETURN) m_pDec->GetOption (DECODER_OPTION_ERROR_CON_IDC, NULL);
-  EXPECT_EQ (eRet, cmInitParaError);
-
-  //Test GetOption
-  //valid input
-  eRet = (CM_RETURN) m_pDec->GetOption (DECODER_OPTION_ERROR_CON_IDC, &iOut);
-  EXPECT_EQ (eRet, cmResultSuccess);
-
-  //Test SetOption
-  iTmp = rand() & 7;
-  eRet = (CM_RETURN) m_pDec->SetOption (DECODER_OPTION_ERROR_CON_IDC, &iTmp);
-  EXPECT_EQ (eRet, cmResultSuccess);
-
-  //Test GetOption
-  eRet = (CM_RETURN) m_pDec->GetOption (DECODER_OPTION_ERROR_CON_IDC, &iOut);
-  EXPECT_EQ (eRet, cmResultSuccess);
-  EXPECT_EQ (iTmp, iOut);
-
-  Uninit();
-
+  //TODO
 }
 
 //DECODER_OPTION_TRACE_LEVEL
@@ -501,11 +403,7 @@ void DecoderInterfaceTest::TestGetDecStatistics() {
   SDecoderStatistics sDecStatic;
   int32_t iError = 0;
 
-  ValidInit();
-  //GetOption before decoding
-  m_pDec->GetOption (DECODER_OPTION_GET_STATISTICS, &sDecStatic);
-  EXPECT_EQ (0u, sDecStatic.uiDecodedFrameCount);
-  EXPECT_TRUE (-1 == sDecStatic.iAvgLumaQp);
+  Init();
   // setoption not support,
   eRet = (CM_RETURN)m_pDec->SetOption (DECODER_OPTION_GET_STATISTICS, NULL);
   EXPECT_EQ (eRet, cmInitParaError);
@@ -528,7 +426,7 @@ void DecoderInterfaceTest::TestGetDecStatistics() {
   Uninit();
 
   //Decoder error bs when the first IDR lost
-  ValidInit();
+  Init();
   iError = 2;
   m_pDec->SetOption (DECODER_OPTION_ERROR_CON_IDC, &iError);
   DecoderBs ("res/BA_MW_D_IDR_LOST.264");
@@ -546,7 +444,7 @@ void DecoderInterfaceTest::TestGetDecStatistics() {
   Uninit();
 
   //ecoder error bs when the first P lost
-  ValidInit();
+  Init();
   iError = 2;
   m_pDec->SetOption (DECODER_OPTION_ERROR_CON_IDC, &iError);
 
@@ -567,7 +465,7 @@ void DecoderInterfaceTest::TestGetDecStatistics() {
   //EC enable
 
   //EC Off UT just correc bitstream
-  ValidInit();
+  Init();
   iError = 0;
   m_pDec->SetOption (DECODER_OPTION_ERROR_CON_IDC, &iError);
   DecoderBs ("res/test_vd_1d.264");
@@ -591,6 +489,8 @@ TEST_F (DecoderInterfaceTest, DecoderInterfaceAll) {
 
   //Initialize Uninitialize
   TestInitUninit();
+  //DECODER_OPTION_DATAFORMAT
+  TestDataFormat();
   //DECODER_OPTION_END_OF_STREAM
   TestEndOfStream();
   //DECODER_OPTION_VCL_NAL

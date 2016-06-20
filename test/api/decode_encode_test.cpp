@@ -5,7 +5,7 @@
 #include "utils/InputStream.h"
 #include "BaseDecoderTest.h"
 #include "BaseEncoderTest.h"
-
+#include <string>
 static void UpdateHashFromFrame (const SFrameBSInfo& info, SHA1Context* ctx) {
   for (int i = 0; i < info.iLayerNum; ++i) {
     const SLayerBSInfo& layerInfo = info.sLayerInfo[i];
@@ -91,22 +91,49 @@ class DecodeEncodeTest : public ::testing::TestWithParam<DecodeEncodeFileParam>,
   BufferedData buf_;
 };
 
+void DecEncFileParamToParamExt (DecodeEncodeFileParam * pDecEncFileParam, SEncParamExt* pEnxParamExt) {
+  ASSERT_TRUE (NULL != pDecEncFileParam && NULL != pEnxParamExt);
+
+  pEnxParamExt->iPicWidth      = pDecEncFileParam->width;
+  pEnxParamExt->iPicHeight     = pDecEncFileParam->height;
+  pEnxParamExt->fMaxFrameRate  = pDecEncFileParam->frameRate;
+
+  //default value
+  pEnxParamExt->iUsageType        = CAMERA_VIDEO_REAL_TIME;
+  pEnxParamExt->iSpatialLayerNum  = 1;
+  pEnxParamExt->bEnableDenoise    = false;
+  pEnxParamExt->bIsLosslessLink   = false;
+  pEnxParamExt->bEnableLongTermReference  = false;
+  pEnxParamExt->iEntropyCodingModeFlag    = 0;
+
+  for (int i = 0; i < pEnxParamExt->iSpatialLayerNum; i++) {
+     pEnxParamExt->sSpatialLayers[i].sSliceCfg.uiSliceMode = SM_SINGLE_SLICE;
+  }
+
+}
 TEST_P (DecodeEncodeTest, CompareOutput) {
   DecodeEncodeFileParam p = GetParam();
+  SEncParamExt  EnxParamExt;
+  DecEncFileParamToParamExt(&p,&EnxParamExt);
 
+#if defined(ANDROID_NDK)
+  std::string filename = std::string ("/sdcard/") + p.fileName;
+  ASSERT_TRUE (Open (filename.c_str()));
+#else
   ASSERT_TRUE (Open (p.fileName));
-  EncodeStream (this, CAMERA_VIDEO_REAL_TIME, p.width, p.height, p.frameRate, SM_SINGLE_SLICE, false, 1, this);
+#endif
+  EncodeStream (this, &EnxParamExt, this);
   unsigned char digest[SHA_DIGEST_LENGTH];
   SHA1Result (&ctx_, digest);
   if (!HasFatalFailure()) {
     CompareHash (digest, p.hashStr);
   }
 }
-
 static const DecodeEncodeFileParam kFileParamArray[] = {
-  {"res/test_vd_1d.264", "a4c7299ec1a7bacd5819685e221a79ac2b56cdbc", 320, 192, 12.0f},
-  {"res/test_vd_rc.264", "106fd8cc978c1801b0d1f8297e9b7f17d5336e15", 320, 192, 12.0f},
+  {"res/test_vd_1d.264", "3fee3297d9c69aa8726498fdacba87f1e12100b0", 320, 192, 12.0f},
+  {"res/test_vd_rc.264", "556ac0894af7bc93a27b3f0876184e0171288038", 320, 192, 12.0f},
 };
+
 
 INSTANTIATE_TEST_CASE_P (DecodeEncodeFile, DecodeEncodeTest,
                          ::testing::ValuesIn (kFileParamArray));

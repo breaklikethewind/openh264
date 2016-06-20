@@ -95,7 +95,7 @@ TEST_F (EncInterfaceCallTest, SetOptionLTR) {
     while (fileStream.read (buf.data(), frameSize) == frameSize) {
       ret = encoder_->EncodeFrame (&pic, &info);
       ASSERT_TRUE (ret == cmResultSuccess);
-      if (info.eFrameType != videoFrameTypeSkip) {
+      if (info.eFrameType != videoFrameTypeSkip && this != NULL) {
         this->onEncodeFrame (info);
         iFrameNum++;
       }

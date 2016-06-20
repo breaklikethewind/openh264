@@ -1,6 +1,6 @@
 include $(SRC_PATH)build/arch.mk
 ifeq ($(ASM_ARCH), x86)
-ifeq ($(ARCH), x86_64)
+ifeq ($(ENABLE64BIT), Yes)
 ASMFLAGS += -f win64
 ASMFLAGS_PLATFORM = -DWIN64
 else
@@ -10,7 +10,7 @@ else
 endif
 ifeq ($(ASM_ARCH), arm)
 CCAS = gas-preprocessor.pl -as-type armasm -force-thumb -- armasm
-CCASFLAGS = -nologo -DHAVE_NEON -ignore 4509
+CCASFLAGS = -nologo -DHAVE_NEON
 endif
 
 CC=cl
@@ -40,10 +40,4 @@ SHAREDLIBSUFFIX=dll
 SHAREDLIBSUFFIXVER=$(SHAREDLIBSUFFIX)
 SHARED=-LD
 EXTRA_LIBRARY=$(PROJECT_NAME)_dll.lib
-LDFLAGS += -link
-SHLDFLAGS=-debug -map -opt:ref -opt:icf -def:$(SRC_PATH)openh264.def -implib:$(EXTRA_LIBRARY)
-STATIC_LDFLAGS=
-CODEC_UNITTEST_CFLAGS=-D_CRT_SECURE_NO_WARNINGS
-
-%.res: %.rc
-	$(QUIET_RC)rc -fo $@ $<
+SHLDFLAGS=-link -def:openh264.def -implib:$(EXTRA_LIBRARY)

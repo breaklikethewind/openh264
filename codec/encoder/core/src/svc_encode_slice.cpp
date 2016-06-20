@@ -558,13 +558,13 @@ int32_t WelsISliceMdEncDynamic (sWelsEncCtx* pEncCtx, SSlice* pSlice) { //pMd + 
 
   if (pEncCtx->pSvcParam->iEntropyCodingModeFlag) {
     WelsInitSliceCabac (pEncCtx, pSlice);
- }
+  }
   for (; ;) {
     iCurMbIdx	= iNextMbIdx;
     pCurMb = &pMbList[ iCurMbIdx ];
 
     pEncCtx->pFuncList->pfStashMBStatus (&sDss, pSlice, 0);
-   pEncCtx->pFuncList->pfRc.pfWelsRcMbInit (pEncCtx, pCurMb, pSlice);
+    pEncCtx->pFuncList->pfRc.pfWelsRcMbInit (pEncCtx, pCurMb, pSlice);
     // if already reaches the largest number of slices, set QPs to the upper bound
     if (pSlice->bDynamicSlicingSliceSizeCtrlFlag) {
       pCurMb->uiLumaQp = pEncCtx->pWelsSvcRc[pEncCtx->uiDependencyId].iMaxQp;
