@@ -355,10 +355,6 @@
 			Filter="h;hpp;hxx;hm;inl"
 			>
 			<File
-				RelativePath="..\..\..\common\inc\mem_align.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\..\common\inc\welsCodecTrace.h"
 				>
 			</File>
@@ -372,7 +368,7 @@
 			Filter="ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe"
 			>
 			<File
-				RelativePath="..\..\..\decoder\plus\res\welsdec.rc"
+				RelativePath="..\..\..\..\openh264.rc"
 				>
 			</File>
 		</Filter>

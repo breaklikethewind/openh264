@@ -28,7 +28,7 @@
  *     ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *     POSSIBILITY OF SUCH DAMAGE.
  *
- * h264dec.cpp:		Wels Decoder Console Implementation file
+ * h264dec.cpp:         Wels Decoder Console Implementation file
  */
 
 #if defined (_WIN32)
@@ -54,6 +54,13 @@
 
 
 using namespace std;
+
+#if defined (WINDOWS_PHONE)
+double g_dDecTime = 0.0;
+float  g_fDecFPS = 0.0;
+int    g_iDecodedFrameNum = 0;
+#endif
+
 #if defined(ANDROID_NDK)
 #define LOG_TAG "welsdec"
 #define LOGI(...) __android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, __VA_ARGS__)
@@ -62,12 +69,12 @@ using namespace std;
 #endif
 //using namespace WelsDec;
 
-//#define NO_DELAY_DECODING	// For Demo interfaces test with no delay decoding
+//#define NO_DELAY_DECODING // For Demo interfaces test with no delay decoding
 
 void H264DecodeInstance (ISVCDecoder* pDecoder, const char* kpH264FileName, const char* kpOuputFileName,
                          int32_t& iWidth, int32_t& iHeight, const char* pOptionFileName, const char* pLengthFileName) {
-  FILE* pH264File	  = NULL;
-  FILE* pYuvFile	  = NULL;
+  FILE* pH264File   = NULL;
+  FILE* pYuvFile    = NULL;
   FILE* pOptionFile = NULL;
 // Lenght input mode support
   FILE* fpTrack = NULL;
@@ -122,7 +129,7 @@ void H264DecodeInstance (ISVCDecoder* pDecoder, const char* kpH264FileName, cons
     if (pYuvFile == NULL) {
       fprintf (stderr, "Can not open yuv file to output result of decoding..\n");
       // any options
-      //return;	// can let decoder work in quiet mode, no writing any output
+      //return; // can let decoder work in quiet mode, no writing any output
     } else
       fprintf (stderr, "Sequence output file name: %s..\n", kpOuputFileName);
   } else {
@@ -230,8 +237,8 @@ void H264DecodeInstance (ISVCDecoder* pDecoder, const char* kpH264FileName, cons
       pDst[1] = pData[1];
       pDst[2] = pData[2];
     }
-    iEnd	= WelsTime();
-    iTotal	+= iEnd - iStart;
+    iEnd    = WelsTime();
+    iTotal += iEnd - iStart;
     if (sDstBufInfo.iBufferStatus == 1) {
       cOutputModule.Process ((void**)pDst, &sDstBufInfo, pYuvFile);
       iWidth  = sDstBufInfo.UsrData.sSystemBuffer.iWidth;
@@ -262,8 +269,8 @@ void H264DecodeInstance (ISVCDecoder* pDecoder, const char* kpH264FileName, cons
       pDst[1] = pData[1];
       pDst[2] = pData[2];
     }
-    iEnd	= WelsTime();
-    iTotal	+= iEnd - iStart;
+    iEnd    = WelsTime();
+    iTotal += iEnd - iStart;
     if (sDstBufInfo.iBufferStatus == 1) {
       cOutputModule.Process ((void**)pDst, &sDstBufInfo, pYuvFile);
       iWidth  = sDstBufInfo.UsrData.sSystemBuffer.iWidth;
@@ -292,9 +299,15 @@ void H264DecodeInstance (ISVCDecoder* pDecoder, const char* kpH264FileName, cons
 
   dElapsed = iTotal / 1e6;
   fprintf (stderr, "-------------------------------------------------------\n");
-  fprintf (stderr, "iWidth:		%d\nheight:		%d\nFrames:		%d\ndecode time:	%f sec\nFPS:		%f fps\n",
+  fprintf (stderr, "iWidth:\t\t%d\nheight:\t\t%d\nFrames:\t\t%d\ndecode time:\t%f sec\nFPS:\t\t%f fps\n",
            iWidth, iHeight, iFrameCount, dElapsed, (iFrameCount * 1.0) / dElapsed);
   fprintf (stderr, "-------------------------------------------------------\n");
+
+#if defined (WINDOWS_PHONE)
+  g_dDecTime = dElapsed;
+  g_fDecFPS = (iFrameCount * 1.0f) / (float) dElapsed;
+  g_iDecodedFrameNum = iFrameCount;
+#endif
 
   // coverity scan uninitial
 label_exit:
@@ -316,7 +329,7 @@ label_exit:
   }
 }
 
-#if (defined(ANDROID_NDK)||defined(APPLE_IOS))
+#if (defined(ANDROID_NDK)||defined(APPLE_IOS) || defined (WINDOWS_PHONE))
 int32_t DecMain (int32_t iArgC, char* pArgV[]) {
 #else
 int32_t main (int32_t iArgC, char* pArgV[]) {
@@ -349,26 +362,26 @@ int32_t main (int32_t iArgC, char* pArgV[]) {
         long nRd = cReadCfg.ReadLine (&strTag[0]);
         if (nRd > 0) {
           if (strTag[0].compare ("InputFile") == 0) {
-            strInputFile	= strTag[1];
+            strInputFile = strTag[1];
           } else if (strTag[0].compare ("OutputFile") == 0) {
-            strOutputFile	= strTag[1];
+            strOutputFile = strTag[1];
           } else if (strTag[0].compare ("RestructionFile") == 0) {
-            strReconFile	= strTag[1];
+            strReconFile = strTag[1];
             int32_t iLen = (int32_t)strReconFile.length();
-            sDecParam.pFileNameRestructed	= new char[iLen + 1];
+            sDecParam.pFileNameRestructed = new char[iLen + 1];
             if (sDecParam.pFileNameRestructed != NULL) {
               sDecParam.pFileNameRestructed[iLen] = 0;
             }
 
             strncpy (sDecParam.pFileNameRestructed, strReconFile.c_str(), iLen); //confirmed_safe_unsafe_usage
           } else if (strTag[0].compare ("TargetDQID") == 0) {
-            sDecParam.uiTargetDqLayer	= (uint8_t)atol (strTag[1].c_str());
+            sDecParam.uiTargetDqLayer = (uint8_t)atol (strTag[1].c_str());
           } else if (strTag[0].compare ("OutColorFormat") == 0) {
             sDecParam.eOutputColorFormat = (EVideoFormatType) atoi (strTag[1].c_str());
           } else if (strTag[0].compare ("ErrorConcealmentIdc") == 0) {
             sDecParam.eEcActiveIdc = (ERROR_CON_IDC)atol (strTag[1].c_str());
           } else if (strTag[0].compare ("CPULoad") == 0) {
-            sDecParam.uiCpuLoad	= (uint32_t)atol (strTag[1].c_str());
+            sDecParam.uiCpuLoad = (uint32_t)atol (strTag[1].c_str());
           } else if (strTag[0].compare ("VideoBitstreamType") == 0) {
             sDecParam.sVideoProperty.eVideoBsType = (VIDEO_BITSTREAM_TYPE)atol (strTag[1].c_str());
           }
@@ -380,17 +393,17 @@ int32_t main (int32_t iArgC, char* pArgV[]) {
       }
     } else if (strstr (pArgV[1],
                        ".264")) { // no output dump yuv file, just try to render the decoded pictures //confirmed_safe_unsafe_usage
-      strInputFile	= pArgV[1];
-      sDecParam.eOutputColorFormat          = videoFormatI420;
-      sDecParam.uiTargetDqLayer	          = (uint8_t) - 1;
+      strInputFile = pArgV[1];
+      sDecParam.eOutputColorFormat = videoFormatI420;
+      sDecParam.uiTargetDqLayer = (uint8_t) - 1;
       sDecParam.eEcActiveIdc = ERROR_CON_SLICE_COPY;
       sDecParam.sVideoProperty.eVideoBsType = VIDEO_BITSTREAM_DEFAULT;
     }
   } else { //iArgC > 2
-    strInputFile	= pArgV[1];
-    strOutputFile	= pArgV[2];
-    sDecParam.eOutputColorFormat	= videoFormatI420;
-    sDecParam.uiTargetDqLayer	= (uint8_t) - 1;
+    strInputFile = pArgV[1];
+    strOutputFile = pArgV[2];
+    sDecParam.eOutputColorFormat = videoFormatI420;
+    sDecParam.uiTargetDqLayer = (uint8_t) - 1;
     sDecParam.eEcActiveIdc = ERROR_CON_SLICE_COPY;
     sDecParam.sVideoProperty.eVideoBsType = VIDEO_BITSTREAM_DEFAULT;
     if (iArgC > 3) {

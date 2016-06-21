@@ -11,11 +11,11 @@ using namespace WelsVP;
 void DyadicBilinearDownsampler_ref (uint8_t* pDst, const int32_t kiDstStride,
                                     uint8_t* pSrc, const int32_t kiSrcStride,
                                     const int32_t kiSrcWidth, const int32_t kiSrcHeight) {
-  uint8_t* pDstLine	= pDst;
-  uint8_t* pSrcLine	= pSrc;
-  const int32_t kiSrcStridex2	= kiSrcStride << 1;
-  const int32_t kiDstWidth		= kiSrcWidth >> 1;
-  const int32_t kiDstHeight	= kiSrcHeight >> 1;
+  uint8_t* pDstLine = pDst;
+  uint8_t* pSrcLine = pSrc;
+  const int32_t kiSrcStridex2 = kiSrcStride << 1;
+  const int32_t kiDstWidth    = kiSrcWidth  >> 1;
+  const int32_t kiDstHeight   = kiSrcHeight >> 1;
 
   for (int32_t j = 0; j < kiDstHeight; j ++) {
     for (int32_t i = 0; i < kiDstWidth; i ++) {
@@ -25,8 +25,8 @@ void DyadicBilinearDownsampler_ref (uint8_t* pDst, const int32_t kiDstStride,
 
       pDstLine[i] = (uint8_t) ((kiTempRow1 + kiTempRow2 + 1) >> 1);
     }
-    pDstLine	+= kiDstStride;
-    pSrcLine	+= kiSrcStridex2;
+    pDstLine += kiDstStride;
+    pSrcLine += kiSrcStridex2;
   }
 }
 
@@ -72,7 +72,7 @@ void GeneralBilinearFastDownsampler_ref (uint8_t* pDst, const int32_t kiDstStrid
       x += 1;
       x >>= 1;
       //x = (((__int64)(SCALE_BIG - 1 - iFu))*(SCALE_BIG - 1 - fv)*a + ((__int64)iFu)*(SCALE_BIG - 1 -fv)*b + ((__int64)(SCALE_BIG - 1 -iFu))*fv*c +
-      //		 ((__int64)iFu)*fv*d + (1 << (2*SCALE_BIT_BIG-1)) ) >> (2*SCALE_BIT_BIG);
+      // ((__int64)iFu)*fv*d + (1 << (2*SCALE_BIT_BIG-1)) ) >> (2*SCALE_BIT_BIG);
       x = WELS_CLAMP (x, 0, 255);
       *pByDst++ = (uint8_t)x;
 
@@ -199,6 +199,79 @@ TEST (DownSampleTest, func) { \
   } \
 }
 
+#define GENERATE_DyadicBilinearOneThirdDownsampler_UT(func, ASM, CPUFLAGS) \
+TEST (DownSampleTest, func) { \
+  if (ASM) {\
+    int32_t iCpuCores = 0; \
+    uint32_t m_uiCpuFeatureFlag = WelsCPUFeatureDetect (&iCpuCores); \
+    if (0 == (m_uiCpuFeatureFlag & CPUFLAGS)) \
+    return; \
+  } \
+  ENFORCE_STACK_ALIGN_1D (uint8_t, dst_c, 50000, 16); \
+  ENFORCE_STACK_ALIGN_1D (uint8_t, src_c, 50000, 16); \
+  int dst_stride_c; \
+  int src_stride_c; \
+  int src_width_c; \
+  int src_height_c; \
+  ENFORCE_STACK_ALIGN_1D (uint8_t, dst_a, 50000, 16); \
+  ENFORCE_STACK_ALIGN_1D (uint8_t, src_a, 50000, 16); \
+  int dst_stride_a; \
+  int src_stride_a; \
+  int src_width_a; \
+  int src_height_a; \
+  dst_stride_c = dst_stride_a = 560; \
+  src_stride_c = src_stride_a = 560; \
+  src_width_c = src_width_a = 480; \
+  src_height_c = src_height_a = 30; \
+  for (int j = 0; j < 50000; j++) { \
+    dst_c[j] = dst_a[j] = rand() % 256; \
+    src_c[j] = src_a[j] = rand() % 256; \
+  } \
+  DyadicBilinearOneThirdDownsampler_c (dst_c, dst_stride_c, src_c, src_stride_c, src_width_c, src_height_c/3); \
+  func (dst_a, dst_stride_a, src_a, src_stride_a, src_width_a, src_height_a/3); \
+  for (int j = 0; j < (src_height_c /3 ); j++) { \
+    for (int m = 0; m < (src_width_c /3); m++) { \
+      ASSERT_EQ (dst_c[m + j * dst_stride_c], dst_a[m + j * dst_stride_a]); \
+    } \
+  } \
+}
+
+#define GENERATE_DyadicBilinearQuarterDownsampler_UT(func, ASM, CPUFLAGS) \
+TEST (DownSampleTest, func) { \
+  if (ASM) {\
+    int32_t iCpuCores = 0; \
+    uint32_t m_uiCpuFeatureFlag = WelsCPUFeatureDetect (&iCpuCores); \
+    if (0 == (m_uiCpuFeatureFlag & CPUFLAGS)) \
+    return; \
+  } \
+  ENFORCE_STACK_ALIGN_1D (uint8_t, dst_c, 50000, 16); \
+  ENFORCE_STACK_ALIGN_1D (uint8_t, src_c, 50000, 16); \
+  int dst_stride_c; \
+  int src_stride_c; \
+  int src_width_c; \
+  int src_height_c; \
+  ENFORCE_STACK_ALIGN_1D (uint8_t, dst_a, 50000, 16); \
+  ENFORCE_STACK_ALIGN_1D (uint8_t, src_a, 50000, 16); \
+  int dst_stride_a; \
+  int src_stride_a; \
+  int src_width_a; \
+  int src_height_a; \
+  dst_stride_c = dst_stride_a = 560; \
+  src_stride_c = src_stride_a = 560; \
+  src_width_c = src_width_a = 640; \
+  src_height_c = src_height_a = 80; \
+  for (int j = 0; j < 50000; j++) { \
+    dst_c[j] = dst_a[j] = rand() % 256; \
+    src_c[j] = src_a[j] = rand() % 256; \
+  } \
+  DyadicBilinearQuarterDownsampler_c (dst_c, dst_stride_c, src_c, src_stride_c, src_width_c, src_height_c); \
+  func (dst_a, dst_stride_a, src_a, src_stride_a, src_width_a, src_height_a); \
+  for (int j = 0; j < (src_height_c >> 2); j++) { \
+    for (int m = 0; m < (src_width_c >> 2); m++) { \
+      ASSERT_EQ (dst_c[m + j * dst_stride_c], dst_a[m + j * dst_stride_a]); \
+    } \
+  } \
+}
 #define GENERATE_GeneralBilinearDownsampler_UT(func, ref, ASM, CPUFLAGS) \
 TEST (DownSampleTest, func) { \
   if (ASM) {\
@@ -259,6 +332,13 @@ GENERATE_DyadicBilinearDownsampler_UT (DyadicBilinearDownsamplerWidthx16_ssse3, 
 GENERATE_DyadicBilinearDownsampler_UT (DyadicBilinearDownsamplerWidthx32_sse4, 1, WELS_CPU_SSE41)
 GENERATE_DyadicBilinearDownsampler_UT (DyadicBilinearDownsamplerWidthx16_sse4, 1, WELS_CPU_SSE41)
 
+GENERATE_DyadicBilinearOneThirdDownsampler_UT (DyadicBilinearOneThirdDownsampler_ssse3, 1, WELS_CPU_SSSE3)
+GENERATE_DyadicBilinearOneThirdDownsampler_UT (DyadicBilinearOneThirdDownsampler_sse4, 1, WELS_CPU_SSE41)
+
+GENERATE_DyadicBilinearQuarterDownsampler_UT (DyadicBilinearQuarterDownsampler_sse, 1, WELS_CPU_SSE)
+GENERATE_DyadicBilinearQuarterDownsampler_UT (DyadicBilinearQuarterDownsampler_ssse3, 1, WELS_CPU_SSSE3)
+GENERATE_DyadicBilinearQuarterDownsampler_UT (DyadicBilinearQuarterDownsampler_sse4, 1, WELS_CPU_SSE41)
+
 GENERATE_GeneralBilinearDownsampler_UT (GeneralBilinearFastDownsamplerWrap_sse2, GeneralBilinearFastDownsampler_ref, 1,
                                         WELS_CPU_SSE2)
 GENERATE_GeneralBilinearDownsampler_UT (GeneralBilinearAccurateDownsamplerWrap_sse2,
@@ -269,6 +349,10 @@ GENERATE_GeneralBilinearDownsampler_UT (GeneralBilinearAccurateDownsamplerWrap_s
 GENERATE_DyadicBilinearDownsampler_UT (DyadicBilinearDownsamplerWidthx32_neon, 1, WELS_CPU_NEON)
 GENERATE_DyadicBilinearDownsampler_UT (DyadicBilinearDownsampler_neon, 1, WELS_CPU_NEON)
 
+GENERATE_DyadicBilinearOneThirdDownsampler_UT (DyadicBilinearOneThirdDownsampler_neon, 1, WELS_CPU_NEON)
+
+GENERATE_DyadicBilinearQuarterDownsampler_UT (DyadicBilinearQuarterDownsampler_neon, 1, WELS_CPU_NEON)
+
 GENERATE_GeneralBilinearDownsampler_UT (GeneralBilinearAccurateDownsamplerWrap_neon,
                                         GeneralBilinearAccurateDownsampler_ref, 1, WELS_CPU_NEON)
 #endif
@@ -276,6 +360,10 @@ GENERATE_GeneralBilinearDownsampler_UT (GeneralBilinearAccurateDownsamplerWrap_n
 #if defined(HAVE_NEON_AARCH64)
 GENERATE_DyadicBilinearDownsampler_UT (DyadicBilinearDownsamplerWidthx32_AArch64_neon, 1, WELS_CPU_NEON)
 GENERATE_DyadicBilinearDownsampler_UT (DyadicBilinearDownsampler_AArch64_neon, 1, WELS_CPU_NEON)
+
+GENERATE_DyadicBilinearOneThirdDownsampler_UT (DyadicBilinearOneThirdDownsampler_AArch64_neon, 1, WELS_CPU_NEON)
+
+GENERATE_DyadicBilinearQuarterDownsampler_UT (DyadicBilinearQuarterDownsampler_AArch64_neon, 1, WELS_CPU_NEON)
 
 GENERATE_GeneralBilinearDownsampler_UT (GeneralBilinearAccurateDownsamplerWrap_AArch64_neon,
                                         GeneralBilinearAccurateDownsampler_ref, 1, WELS_CPU_NEON)

@@ -29,11 +29,11 @@
  *     POSSIBILITY OF SUCH DAMAGE.
  *
  *
- * \file	deblocking.h
+ * \file    deblocking.h
  *
- * \brief	Interfaces introduced in frame deblocking filtering
+ * \brief   Interfaces introduced in frame deblocking filtering
  *
- * \date	08/03/2009 Created
+ * \date    08/03/2009 Created
  *
  *************************************************************************************
  */
@@ -50,11 +50,11 @@ namespace WelsEnc {
 //struct tagDeblockingFunc;
 
 typedef struct TagDeblockingFilter {
-  uint8_t*		pCsData[3];	// pointer to reconstructed picture pData
-  int32_t		iCsStride[3];	// Cs iStride
+  uint8_t*    pCsData[3];     // pointer to reconstructed picture pData
+  int32_t     iCsStride[3];   // Cs iStride
   int16_t     iMbStride;
-  int8_t		iSliceAlphaC0Offset;
-  int8_t		iSliceBetaOffset;
+  int8_t      iSliceAlphaC0Offset;
+  int8_t      iSliceBetaOffset;
   uint8_t     uiLumaQP;
   uint8_t     uiChromaQP;
   uint8_t     uiFilterIdc;
@@ -84,6 +84,7 @@ void PerformDeblockingFilter (sWelsEncCtx* pEnc);
 void DeblockingFilterFrameAvcbase (SDqLayer* pCurDq, SWelsFuncPtrList* pFunc);
 
 void DeblockingFilterSliceAvcbase (SDqLayer* pCurDq, SWelsFuncPtrList* pFunc, const int32_t kiSliceIdx);
+void DeblockingFilterSliceAvcbaseNull (SDqLayer* pCurDq, SWelsFuncPtrList* pFunc, const int32_t kiSliceIdx);
 }
 
 #endif

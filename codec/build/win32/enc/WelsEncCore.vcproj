@@ -495,10 +495,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\encoder\core\inc\bit_stream.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\..\common\inc\copy_mb.h"
 				>
 			</File>
@@ -551,6 +547,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\..\common\inc\golomb_common.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\common\inc\ls_defines.h"
 				>
 			</File>
@@ -588,10 +588,6 @@
 			</File>
 			<File
 				RelativePath="..\..\..\encoder\core\inc\nal_encap.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\encoder\core\inc\nal_prefix.h"
 				>
 			</File>
 			<File
@@ -695,10 +691,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\encoder\core\inc\trace.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\..\common\inc\typedefs.h"
 				>
 			</File>
@@ -715,7 +707,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\encoder\core\inc\wels_common_defs.h"
+				RelativePath="..\..\..\common\inc\wels_common_defs.h"
 				>
 			</File>
 			<File

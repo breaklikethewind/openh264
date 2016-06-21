@@ -28,7 +28,7 @@
  *     ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *     POSSIBILITY OF SUCH DAMAGE.
  *
- *	error_concealment.cpp:	Wels decoder error concealment implementation
+ *      error_concealment.cpp:  Wels decoder error concealment implementation
  */
 
 #include "error_code.h"
@@ -64,14 +64,14 @@ void InitErrorCon (PWelsDecoderContext pCtx) {
 
 #if defined(HAVE_NEON)
     if (pCtx->uiCpuFlag & WELS_CPU_NEON) {
-      pCtx->sCopyFunc.pCopyLumaFunc		= WelsCopy16x16_neon; //aligned
-      pCtx->sCopyFunc.pCopyChromaFunc		= WelsCopy8x8_neon; //aligned
+      pCtx->sCopyFunc.pCopyLumaFunc     = WelsCopy16x16_neon; //aligned
+      pCtx->sCopyFunc.pCopyChromaFunc   = WelsCopy8x8_neon; //aligned
     }
 #endif //HAVE_NEON
 #if defined(HAVE_NEON_AARCH64)
     if (pCtx->uiCpuFlag & WELS_CPU_NEON) {
-      pCtx->sCopyFunc.pCopyLumaFunc		= WelsCopy16x16_AArch64_neon; //aligned
-      pCtx->sCopyFunc.pCopyChromaFunc		= WelsCopy8x8_AArch64_neon; //aligned
+      pCtx->sCopyFunc.pCopyLumaFunc     = WelsCopy16x16_AArch64_neon; //aligned
+      pCtx->sCopyFunc.pCopyChromaFunc   = WelsCopy8x8_AArch64_neon; //aligned
     }
 #endif //HAVE_NEON_AARCH64
   } //TODO add more methods here
@@ -92,6 +92,8 @@ void DoErrorConFrameCopy (PWelsDecoderContext pCtx) {
     memset (pDstPic->pData[0], 128, uiHeightInPixelY * iStrideY);
     memset (pDstPic->pData[1], 128, (uiHeightInPixelY >> 1) * iStrideUV);
     memset (pDstPic->pData[2], 128, (uiHeightInPixelY >> 1) * iStrideUV);
+  } else if (pSrcPic == pDstPic) {
+    WelsLog (& (pCtx->sLogCtx), WELS_LOG_WARNING, "DoErrorConFrameCopy()::EC memcpy overlap.");
   } else { //has ref pic here
     memcpy (pDstPic->pData[0], pSrcPic->pData[0], uiHeightInPixelY * iStrideY);
     memcpy (pDstPic->pData[1], pSrcPic->pData[1], (uiHeightInPixelY >> 1) * iStrideUV);
@@ -117,6 +119,10 @@ void DoErrorConSliceCopy (PWelsDecoderContext pCtx) {
   uint8_t* pSrcData, *pDstData;
   uint32_t iSrcStride; // = pSrcPic->iLinesize[0];
   uint32_t iDstStride = pDstPic->iLinesize[0];
+  if (pSrcPic == pDstPic) {
+    WelsLog (& (pCtx->sLogCtx), WELS_LOG_WARNING, "DoErrorConSliceCopy()::EC memcpy overlap.");
+    return;
+  }
   for (int32_t iMbY = 0; iMbY < iMbHeight; ++iMbY) {
     for (int32_t iMbX = 0; iMbX < iMbWidth; ++iMbX) {
       iMbXyIndex = iMbY * iMbWidth + iMbX;
@@ -222,23 +228,23 @@ void DoMbECMvCopy (PWelsDecoderContext pCtx, PPicture pDec, PPicture pRef, int32
       iPicHeightBottomLimit = (pMCRefMem->iPicHeight - pCtx->sFrameCrop.iTopOffset * 2);
     }
     // further make sure no need to expand picture
-    int32_t iMinLeftOffset = (iPicWidthLeftLimit + 2) << 2;
-    int32_t iMaxRightOffset = ((iPicWidthRightLimit - 19) << 2);
-    int32_t iMinTopOffset = (iPicHeightTopLimit + 2) << 2;
-    int32_t iMaxBottomOffset = ((iPicHeightBottomLimit - 19) << 2);
+    int32_t iMinLeftOffset = (iPicWidthLeftLimit + 2) * (1 << 2);
+    int32_t iMaxRightOffset = ((iPicWidthRightLimit - 19) * (1 << 2));
+    int32_t iMinTopOffset = (iPicHeightTopLimit + 2) * (1 << 2);
+    int32_t iMaxBottomOffset = ((iPicHeightBottomLimit - 19) * (1 << 2));
     if (iFullMVx < iMinLeftOffset) {
-      iFullMVx = (iFullMVx >> 2) << 2;
+      iFullMVx = (iFullMVx >> 2) * (1 << 2);
       iFullMVx = WELS_MAX (iPicWidthLeftLimit, iFullMVx);
     } else if (iFullMVx > iMaxRightOffset) {
-      iFullMVx = (iFullMVx >> 2) << 2;
-      iFullMVx = WELS_MIN (((iPicWidthRightLimit - 17) << 2), iFullMVx);
+      iFullMVx = (iFullMVx >> 2) * (1 << 2);
+      iFullMVx = WELS_MIN (((iPicWidthRightLimit - 17) * (1 << 2)), iFullMVx);
     }
     if (iFullMVy < iMinTopOffset) {
-      iFullMVy = (iFullMVy >> 2) << 2;
+      iFullMVy = (iFullMVy >> 2) * (1 << 2);
       iFullMVy = WELS_MAX (iPicHeightTopLimit, iFullMVy);
     } else if (iFullMVy > iMaxBottomOffset) {
-      iFullMVy = (iFullMVy >> 2) << 2;
-      iFullMVy = WELS_MIN (((iPicHeightBottomLimit - 17) << 2), iFullMVy);
+      iFullMVy = (iFullMVy >> 2) * (1 << 2);
+      iFullMVy = WELS_MIN (((iPicHeightBottomLimit - 17) * (1 << 2)), iFullMVy);
     }
     iMVs[0] = iFullMVx - (iMbXInPix << 2);
     iMVs[1] = iFullMVy - (iMbYInPix << 2);
@@ -388,7 +394,8 @@ void DoErrorConSliceMVCopy (PWelsDecoderContext pCtx) {
     sMCRefMem.iPicHeight = pDstPic->iHeightInPixel;
     if (pDstPic == pSrcPic) {
       // output error info, EC will be ignored in DoMbECMvCopy
-      WelsLog (& (pCtx->sLogCtx), WELS_LOG_ERROR, "DoErrorConSliceMVCopy()::pPreviousPic and pDec use same buffer, ignored.");
+      WelsLog (& (pCtx->sLogCtx), WELS_LOG_WARNING, "DoErrorConSliceMVCopy()::EC memcpy overlap.");
+      return;
     }
   }
 
@@ -428,6 +435,7 @@ void DoErrorConSliceMVCopy (PWelsDecoderContext pCtx) {
 //Mark erroneous frame as Ref Pic into DPB
 int32_t MarkECFrameAsRef (PWelsDecoderContext pCtx) {
   int32_t iRet = WelsMarkAsRef (pCtx);
+  // Under EC mode, the ERR_INFO_DUPLICATE_FRAME_NUM does not need to be process
   if (iRet != ERR_NONE) {
     return iRet;
   }

@@ -28,20 +28,20 @@
  *     ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *     POSSIBILITY OF SUCH DAMAGE.
  *
- *	cabac_decoder.cpp:	cabac parse for syntax elements
+ *      parse_mb_syn_cabac.cpp: cabac parse for syntax elements
  */
 #include "parse_mb_syn_cabac.h"
 #include "mv_pred.h"
 #include "error_code.h"
 namespace WelsDec {
 #define IDX_UNUSED -1
-static const int16_t g_kMaxPos       [] = {IDX_UNUSED, 15, 14, 15, 3, 14, 3, 3, 14, 14};
-static const int16_t g_kMaxC2       [] = {IDX_UNUSED, 4, 4, 4, 3, 4, 3, 3, 4, 4};
-static const int16_t g_kBlockCat2CtxOffsetCBF[] = {IDX_UNUSED, 0, 4, 8, 12, 16, 12, 12, 16, 16};
-static const int16_t g_kBlockCat2CtxOffsetMap [] = {IDX_UNUSED, 0, 15, 29, 44, 47, 44, 44, 47, 47};
-static const int16_t g_kBlockCat2CtxOffsetLast[] = {IDX_UNUSED, 0, 15, 29, 44, 47, 44, 44, 47, 47};
-static const int16_t g_kBlockCat2CtxOffsetOne [] = {IDX_UNUSED, 0 , 10, 20, 30, 39, 30, 30, 39, 39};
-static const int16_t g_kBlockCat2CtxOffsetAbs [] = {IDX_UNUSED, 0 , 10, 20, 30, 39, 30, 30, 39, 39};
+static const int16_t g_kMaxPos       [] = {IDX_UNUSED, 15, 14, 15, 3, 14, 63, 3, 3, 14, 14};
+static const int16_t g_kMaxC2       [] = {IDX_UNUSED, 4, 4, 4, 3, 4, 4, 3, 3, 4, 4};
+static const int16_t g_kBlockCat2CtxOffsetCBF[] = {IDX_UNUSED, 0, 4, 8, 12, 16, 0, 12, 12, 16, 16};
+static const int16_t g_kBlockCat2CtxOffsetMap [] = {IDX_UNUSED, 0, 15, 29, 44, 47, 0, 44, 44, 47, 47};
+static const int16_t g_kBlockCat2CtxOffsetLast[] = {IDX_UNUSED, 0, 15, 29, 44, 47, 0, 44, 44, 47, 47};
+static const int16_t g_kBlockCat2CtxOffsetOne [] = {IDX_UNUSED, 0 , 10, 20, 30, 39, 0, 30, 30, 39, 39};
+static const int16_t g_kBlockCat2CtxOffsetAbs [] = {IDX_UNUSED, 0 , 10, 20, 30, 39, 0, 30, 30, 39, 39};
 
 const uint8_t g_kTopBlkInsideMb[24] = { //for index with z-order 0~23
   //  0   1 | 4  5      luma 8*8 block           pNonZeroCount[16+8]
@@ -275,6 +275,22 @@ int32_t ParseMBTypePSliceCabac (PWelsDecoderContext pCtx, PWelsNeighAvail pNeigh
   }
   return ERR_NONE;
 }
+int32_t ParseTransformSize8x8FlagCabac (PWelsDecoderContext pCtx, PWelsNeighAvail pNeighAvail,
+                                        bool& bTransformSize8x8Flag) {
+  uint32_t uiCode;
+  int32_t iIdxA, iIdxB;
+  int32_t iCtxInc;
+  PWelsCabacDecEngine pCabacDecEngine = pCtx->pCabacDecEngine;
+  PWelsCabacCtx pBinCtx = pCtx->pCabacCtx + NEW_CTX_OFFSET_TS_8x8_FLAG;
+  iIdxA = (pNeighAvail->iLeftAvail) && (pCtx->pCurDqLayer->pTransformSize8x8Flag[pCtx->pCurDqLayer->iMbXyIndex - 1]);
+  iIdxB = (pNeighAvail->iTopAvail)
+          && (pCtx->pCurDqLayer->pTransformSize8x8Flag[pCtx->pCurDqLayer->iMbXyIndex - pCtx->pCurDqLayer->iMbWidth]);
+  iCtxInc = iIdxA + iIdxB;
+  WELS_READ_VERIFY (DecodeBinCabac (pCabacDecEngine, pBinCtx + iCtxInc, uiCode));
+  bTransformSize8x8Flag = !!uiCode;
+
+  return ERR_NONE;
+}
 int32_t ParseSubMBTypeCabac (PWelsDecoderContext pCtx, PWelsNeighAvail pNeighAvail, uint32_t& uiSubMbType) {
   uint32_t uiCode;
   PWelsCabacDecEngine pCabacDecEngine = pCtx->pCabacDecEngine;
@@ -315,7 +331,7 @@ int32_t ParseIntraPredModeChromaCabac (PWelsDecoderContext pCtx, uint8_t uiNeigh
   uint32_t uiCode;
   int32_t iIdxA, iIdxB, iCtxInc;
   int8_t* pChromaPredMode = pCtx->pCurDqLayer->pChromaPredMode;
-  int8_t* pMbType = pCtx->pCurDqLayer->pMbType;
+  int16_t* pMbType = pCtx->pCurDqLayer->pMbType;
   int32_t iLeftAvail     = uiNeighAvail & 0x04;
   int32_t iTopAvail      = uiNeighAvail & 0x01;
 
@@ -359,8 +375,8 @@ int32_t ParseIntraPredModeChromaCabac (PWelsDecoderContext pCtx, uint8_t uiNeigh
 #endif
 int32_t ParseInterMotionInfoCabac (PWelsDecoderContext pCtx, PWelsNeighAvail pNeighAvail, uint8_t* pNonZeroCount,
                                    int16_t pMotionVector[LIST_A][30][MV_A], int16_t pMvdCache[LIST_A][30][MV_A], int8_t pRefIndex[LIST_A][30]) {
-  PSlice pSlice				= &pCtx->pCurDqLayer->sLayerInfo.sSliceInLayer;
-  PSliceHeader pSliceHeader	= &pSlice->sSliceHeaderExt.sSliceHeader;
+  PSlice pSlice                 = &pCtx->pCurDqLayer->sLayerInfo.sSliceInLayer;
+  PSliceHeader pSliceHeader     = &pSlice->sSliceHeaderExt.sSliceHeader;
   PDqLayer pCurDqLayer = pCtx->pCurDqLayer;
   PPicture* ppRefPic = pCtx->sRefPic.pRefList[LIST_0];
   int32_t pRefCount[2];
@@ -475,6 +491,8 @@ int32_t ParseInterMotionInfoCabac (PWelsDecoderContext pCtx, PWelsNeighAvail pNe
       pCurDqLayer->pSubMbType[iMbXy][i] = g_ksInterSubMbTypeInfo[uiSubMbType].iType;
       pSubPartCount[i] = g_ksInterSubMbTypeInfo[uiSubMbType].iPartCount;
       pPartW[i] = g_ksInterSubMbTypeInfo[uiSubMbType].iPartWidth;
+      // Need modification when B picture add in, reference to 7.3.5
+      pCurDqLayer->pNoSubMbPartSizeLessThan8x8Flag[iMbXy] &= (uiSubMbType == 0);
     }
 
     for (i = 0; i < 4; i++) {
@@ -721,11 +739,11 @@ int32_t ParseCbfInfoCabac (PWelsNeighAvail pNeighAvail, uint8_t* pNzcCache, int3
   int32_t iCurrBlkXy = pCtx->pCurDqLayer->iMbXyIndex;
   int32_t iTopBlkXy = iCurrBlkXy - pCtx->pCurDqLayer->iMbWidth; //default value: MB neighboring
   int32_t iLeftBlkXy = iCurrBlkXy - 1; //default value: MB neighboring
-  uint8_t* pCbfDc = pCtx->pCurDqLayer->pCbfDc;
-  int8_t* pMbType = pCtx->pCurDqLayer->pMbType;
+  uint16_t* pCbfDc = pCtx->pCurDqLayer->pCbfDc;
+  int16_t* pMbType = pCtx->pCurDqLayer->pMbType;
   int32_t iCtxInc;
   uiCbfBit = 0;
-  nA = nB = IS_INTRA (pMbType[iCurrBlkXy]);
+  nA = nB = (int8_t)!!IS_INTRA (pMbType[iCurrBlkXy]);
 
   if (iResProperty == I16_LUMA_DC || iResProperty == CHROMA_DC_U || iResProperty == CHROMA_DC_V) { //DC
     if (pNeighAvail->iTopAvail)
@@ -760,22 +778,27 @@ int32_t ParseCbfInfoCabac (PWelsNeighAvail pNeighAvail, uint8_t* pNzcCache, int3
 int32_t ParseSignificantMapCabac (int32_t* pSignificantMap, int32_t iResProperty, PWelsDecoderContext pCtx,
                                   uint32_t& uiCoeffNum) {
   uint32_t uiCode;
-  PWelsCabacCtx pMapCtx  = pCtx->pCabacCtx + NEW_CTX_OFFSET_MAP + g_kBlockCat2CtxOffsetMap [iResProperty];
-  PWelsCabacCtx pLastCtx = pCtx->pCabacCtx + NEW_CTX_OFFSET_LAST + g_kBlockCat2CtxOffsetLast[iResProperty];
+  PWelsCabacCtx pMapCtx  = pCtx->pCabacCtx + (iResProperty == LUMA_DC_AC_8 ? NEW_CTX_OFFSET_MAP_8x8 : NEW_CTX_OFFSET_MAP)
+                           + g_kBlockCat2CtxOffsetMap [iResProperty];
+  PWelsCabacCtx pLastCtx = pCtx->pCabacCtx + (iResProperty == LUMA_DC_AC_8 ? NEW_CTX_OFFSET_LAST_8x8 :
+                           NEW_CTX_OFFSET_LAST) + g_kBlockCat2CtxOffsetLast[iResProperty];
 
   int32_t i;
   uiCoeffNum = 0;
   int32_t i0 = 0;
   int32_t i1 = g_kMaxPos[iResProperty];
+  int32_t iCtx;
 
   for (i = i0; i < i1; ++i) {
+    iCtx = (iResProperty == LUMA_DC_AC_8 ? g_kuiIdx2CtxSignificantCoeffFlag8x8[i] : i);
     //read significant
-    WELS_READ_VERIFY (DecodeBinCabac (pCtx->pCabacDecEngine, pMapCtx + i, uiCode));
+    WELS_READ_VERIFY (DecodeBinCabac (pCtx->pCabacDecEngine, pMapCtx + iCtx, uiCode));
     if (uiCode) {
       * (pSignificantMap++) = 1;
       ++ uiCoeffNum;
       //read last significant
-      WELS_READ_VERIFY (DecodeBinCabac (pCtx->pCabacDecEngine, pLastCtx + i, uiCode));
+      iCtx = (iResProperty == LUMA_DC_AC_8 ? g_kuiIdx2CtxLastSignificantCoeffFlag8x8[i] : i);
+      WELS_READ_VERIFY (DecodeBinCabac (pCtx->pCabacDecEngine, pLastCtx + iCtx, uiCode));
       if (uiCode) {
         memset (pSignificantMap, 0, (i1 - i) * sizeof (int32_t));
         return ERR_NONE;
@@ -796,8 +819,10 @@ int32_t ParseSignificantMapCabac (int32_t* pSignificantMap, int32_t iResProperty
 
 int32_t ParseSignificantCoeffCabac (int32_t* pSignificant, int32_t iResProperty, PWelsDecoderContext pCtx) {
   uint32_t uiCode;
-  PWelsCabacCtx pOneCtx = pCtx->pCabacCtx + NEW_CTX_OFFSET_ONE + g_kBlockCat2CtxOffsetOne[iResProperty];
-  PWelsCabacCtx pAbsCtx = pCtx->pCabacCtx + NEW_CTX_OFFSET_ABS + g_kBlockCat2CtxOffsetAbs[iResProperty];
+  PWelsCabacCtx pOneCtx = pCtx->pCabacCtx + (iResProperty == LUMA_DC_AC_8 ? NEW_CTX_OFFSET_ONE_8x8 : NEW_CTX_OFFSET_ONE) +
+                          g_kBlockCat2CtxOffsetOne[iResProperty];
+  PWelsCabacCtx pAbsCtx = pCtx->pCabacCtx + (iResProperty == LUMA_DC_AC_8 ? NEW_CTX_OFFSET_ABS_8x8 : NEW_CTX_OFFSET_ABS) +
+                          g_kBlockCat2CtxOffsetAbs[iResProperty];
   const int16_t iMaxType = g_kMaxC2[iResProperty];
   int32_t i = g_kMaxPos[iResProperty];
   int32_t* pCoff = pSignificant + i;
@@ -822,6 +847,45 @@ int32_t ParseSignificantCoeffCabac (int32_t* pSignificant, int32_t iResProperty,
         *pCoff = - *pCoff;
     }
     pCoff--;
+  }
+  return ERR_NONE;
+}
+
+int32_t ParseResidualBlockCabac8x8 (PWelsNeighAvail pNeighAvail, uint8_t* pNonZeroCountCache, SBitStringAux* pBsAux,
+                                    int32_t iIndex, int32_t iMaxNumCoeff, const uint8_t* pScanTable, int32_t iResProperty,
+                                    short* sTCoeff, /*int mb_mode*/ uint8_t uiQp, PWelsDecoderContext pCtx) {
+  uint32_t uiTotalCoeffNum = 0;
+  uint32_t uiCbpBit;
+  int32_t pSignificantMap[64] = {0};
+
+  int32_t iMbResProperty = 0;
+  GetMbResProperty (&iMbResProperty, &iResProperty, false);
+  const uint16_t* pDeQuantMul = (pCtx->bUseScalingList) ? pCtx->pDequant_coeff8x8[iMbResProperty - 6][uiQp] :
+                                g_kuiDequantCoeff8x8[uiQp];
+
+  uiCbpBit = 1; // for 8x8, MaxNumCoeff == 64 && uiCbpBit == 1
+  if (uiCbpBit) { //has coeff
+    WELS_READ_VERIFY (ParseSignificantMapCabac (pSignificantMap, iResProperty, pCtx, uiTotalCoeffNum));
+    WELS_READ_VERIFY (ParseSignificantCoeffCabac (pSignificantMap, iResProperty, pCtx));
+  }
+
+  pNonZeroCountCache[g_kCacheNzcScanIdx[iIndex]] =
+    pNonZeroCountCache[g_kCacheNzcScanIdx[iIndex + 1]] =
+      pNonZeroCountCache[g_kCacheNzcScanIdx[iIndex + 2]] =
+        pNonZeroCountCache[g_kCacheNzcScanIdx[iIndex + 3]] = (uint8_t)uiTotalCoeffNum;
+  if (uiTotalCoeffNum == 0) {
+    return ERR_NONE;
+  }
+  int32_t j = 0, i;
+  if (iResProperty == LUMA_DC_AC_8) {
+    do {
+      if (pSignificantMap[j] != 0) {
+        i = pScanTable[ j ];
+        sTCoeff[i] = uiQp >= 36 ? ((pSignificantMap[j] * pDeQuantMul[i]) * (1 << (uiQp / 6 - 6))) : ((
+                       pSignificantMap[j] * pDeQuantMul[i] + (1 << (5 - uiQp / 6))) >> (6 - uiQp / 6));
+      }
+      ++j;
+    } while (j < 64);
   }
   return ERR_NONE;
 }

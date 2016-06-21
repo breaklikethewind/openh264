@@ -40,18 +40,19 @@ namespace WelsCommon {
 #ifdef MEMORY_CHECK
 static FILE*    fpMemChkPoint;
 static uint32_t nCountRequestNum;
+static int32_t  g_iMemoryLength;
 #endif
 
 
 CMemoryAlign::CMemoryAlign (const uint32_t kuiCacheLineSize)
 #ifdef MEMORY_MONITOR
-  :	m_nMemoryUsageInBytes (0)
+  : m_nMemoryUsageInBytes (0)
 #endif//MEMORY_MONITOR
 {
   if ((kuiCacheLineSize == 0) || (kuiCacheLineSize & 0x0f))
-    m_nCacheLineSize	= 0x10;
+    m_nCacheLineSize = 0x10;
   else
-    m_nCacheLineSize	= kuiCacheLineSize;
+    m_nCacheLineSize = kuiCacheLineSize;
 }
 
 CMemoryAlign::~CMemoryAlign() {
@@ -61,18 +62,18 @@ CMemoryAlign::~CMemoryAlign() {
 }
 
 void* WelsMalloc (const uint32_t kuiSize, const char* kpTag, const uint32_t kiAlign) {
-  const int32_t kiSizeOfVoidPointer	= sizeof (void**);
-  const int32_t kiSizeOfInt				= sizeof (int32_t);
-  const int32_t kiAlignedBytes		= kiAlign - 1;
-  const int32_t kiTrialRequestedSize	= kuiSize + kiAlignedBytes + kiSizeOfVoidPointer + kiSizeOfInt;
-  const int32_t kiActualRequestedSize	= kiTrialRequestedSize;
-  const uint32_t kiPayloadSize			= kuiSize;
+  const int32_t kiSizeOfVoidPointer     = sizeof (void**);
+  const int32_t kiSizeOfInt             = sizeof (int32_t);
+  const int32_t kiAlignedBytes          = kiAlign - 1;
+  const int32_t kiTrialRequestedSize    = kuiSize + kiAlignedBytes + kiSizeOfVoidPointer + kiSizeOfInt;
+  const int32_t kiActualRequestedSize   = kiTrialRequestedSize;
+  const uint32_t kiPayloadSize          = kuiSize;
 
-  uint8_t* pBuf		= (uint8_t*) malloc (kiActualRequestedSize);
+  uint8_t* pBuf = (uint8_t*) malloc (kiActualRequestedSize);
 #ifdef MEMORY_CHECK
   if (fpMemChkPoint == NULL) {
-    m_fpMemChkPoint    = fopen ("./enc_mem_check_point.txt",  "at+");
-    m_nCountRequestNum = 0;
+    fpMemChkPoint    = fopen ("./enc_mem_check_point.txt",  "at+");
+    nCountRequestNum = 0;
   }
 
   if (fpMemChkPoint != NULL) {
@@ -101,10 +102,10 @@ void* WelsMalloc (const uint32_t kuiSize, const char* kpTag, const uint32_t kiAl
 void WelsFree (void* pPointer, const char* kpTag) {
   if (pPointer) {
 #ifdef MEMORY_CHECK
-    if (m_fpMemChkPoint != NULL) {
+    if (fpMemChkPoint != NULL) {
       if (kpTag != NULL)
         fprintf (fpMemChkPoint, "WelsFree(), 0x%x - %s: \t%d\t bytes \n", (void*) (* (((void**) pPointer) - 1)), kpTag,
-                 kiMemoryLength);
+                 g_iMemoryLength);
       else
         fprintf (fpMemChkPoint, "WelsFree(), 0x%x \n", (void*) (* (((void**) pPointer) - 1)));
       fflush (fpMemChkPoint);
@@ -132,19 +133,25 @@ void* CMemoryAlign::WelsMalloc (const uint32_t kuiSize, const char* kpTag) {
     const int32_t kiMemoryLength = * ((int32_t*) ((uint8_t*)pPointer - sizeof (void**) - sizeof (
                                         int32_t))) + m_nCacheLineSize - 1 + sizeof (void**) + sizeof (int32_t);
     m_nMemoryUsageInBytes += kiMemoryLength;
+#ifdef MEMORY_CHECK
+    g_iMemoryLength = kiMemoryLength;
+#endif
   }
 #endif//MEMORY_MONITOR
   return pPointer;
 }
 
 void CMemoryAlign::WelsFree (void* pPointer, const char* kpTag) {
-  if (pPointer) {
 #ifdef MEMORY_MONITOR
+  if (pPointer) {
     const int32_t kiMemoryLength = * ((int32_t*) ((uint8_t*)pPointer - sizeof (void**) - sizeof (
                                         int32_t))) + m_nCacheLineSize - 1 + sizeof (void**) + sizeof (int32_t);
     m_nMemoryUsageInBytes -= kiMemoryLength;
-#endif//MEMORY_MONITOR
+#ifdef MEMORY_CHECK
+    g_iMemoryLength = kiMemoryLength;
+#endif
   }
+#endif//MEMORY_MONITOR
   WelsCommon::WelsFree (pPointer, kpTag);
 }
 

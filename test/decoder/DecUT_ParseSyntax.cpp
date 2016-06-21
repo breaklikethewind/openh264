@@ -65,6 +65,11 @@ int32_t InitDecoder (const bool bParseOnly, PWelsDecoderContext pCtx, SLogContex
   if (NULL == pCtx)
     return cmMallocMemeError;
 
+  if (NULL == pCtx->pMemAlign) {
+    pCtx->pMemAlign = new CMemoryAlign (16);
+    if (NULL == pCtx->pMemAlign)
+      return cmMallocMemeError;
+  }
 
   return WelsInitDecoder (pCtx, bParseOnly, pLogCtx);
 }
@@ -92,9 +97,13 @@ void UninitDecoder (PWelsDecoderContext pCtx) {
     return;
 
   WelsEndDecoder (pCtx);
+  if (NULL != pCtx->pMemAlign) {
+    delete pCtx->pMemAlign;
+    pCtx->pMemAlign = NULL;
+  }
   if (NULL != pCtx) {
     free (pCtx);
-    pCtx	= NULL;
+    pCtx = NULL;
   }
 
 }
@@ -135,7 +144,7 @@ class DecoderParseSyntaxTest : public ::testing::Test {
   unsigned char m_szBuffer[BUF_SIZE]; //for mocking packet
   int m_iBufLength; //record the valid data in m_szBuffer
   PWelsDecoderContext m_pCtx;
-  welsCodecTrace*	m_pWelsTrace;
+  welsCodecTrace* m_pWelsTrace;
 
 };
 
@@ -160,7 +169,8 @@ void DecoderParseSyntaxTest::Init() {
   //
   m_pCtx = (PWelsDecoderContext)malloc (sizeof (SWelsDecoderContext));
 
-  m_pWelsTrace	= new welsCodecTrace();
+  memset (m_pCtx, 0, sizeof (SWelsDecoderContext));
+  m_pWelsTrace = new welsCodecTrace();
   if (m_pWelsTrace != NULL) {
     m_pWelsTrace->SetTraceLevel (WELS_LOG_ERROR);
   }
@@ -272,7 +282,7 @@ void DecoderParseSyntaxTest::TestScalingList() {
 //TEST here for whole tests
 TEST_F (DecoderParseSyntaxTest, DecoderParseSyntaxTestAll) {
 
-  //TestScalingList(); Disable ScalingUTTest in Branch1.4
+  TestScalingList();
 
 }
 

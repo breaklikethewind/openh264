@@ -122,7 +122,7 @@ void anchor_DeblockingLumaNormal (uint8_t* pPix, int32_t iStrideX, int32_t iStri
         iTc++;
       }
       // 8-467,468,469
-      iDelta = WELS_CLIP3 (((((q[0] - p[0]) << 2) + (p[1] - q[1]) + 4) >> 3), -1 * iTc, iTc);
+      iDelta = WELS_CLIP3 (((((q[0] - p[0]) * (1 << 2)) + (p[1] - q[1]) + 4) >> 3), -1 * iTc, iTc);
       pPix[iStrideX * -1] = WELS_CLIP3 ((p[0] + iDelta), 0, 255);
       pPix[0] = WELS_CLIP3 ((q[0] - iDelta), 0, 255);
     }
@@ -194,7 +194,7 @@ void anchor_DeblockingChromaNormal (uint8_t* pPixCb, uint8_t* pPixCr, int32_t iS
     // filterSampleFlag, 8-460
     if (abs (p[0] - q[0]) < iAlpha && abs (p[1] - p[0]) < iBeta && abs (q[1] - q[0]) < iBeta) {
       // 8-467, 468, 469
-      iDelta = WELS_CLIP3 (((((q[0] - p[0]) << 2) + (p[1] - q[1]) + 4) >> 3), -1 * iTc, iTc);
+      iDelta = WELS_CLIP3 (((((q[0] - p[0]) * (1 << 2)) + (p[1] - q[1]) + 4) >> 3), -1 * iTc, iTc);
       pPixCb[iStrideX * -1] = WELS_CLIP3 ((p[0] + iDelta), 0, 255);
       pPixCb[iStrideX * 0 ] = WELS_CLIP3 ((q[0] - iDelta), 0, 255);
     }
@@ -209,7 +209,7 @@ void anchor_DeblockingChromaNormal (uint8_t* pPixCb, uint8_t* pPixCr, int32_t iS
     // filterSampleFlag, 8-460
     if (abs (p[0] - q[0]) < iAlpha && abs (p[1] - p[0]) < iBeta && abs (q[1] - q[0]) < iBeta) {
       // 8-467, 468, 469
-      iDelta = WELS_CLIP3 (((((q[0] - p[0]) << 2) + (p[1] - q[1]) + 4) >> 3), -1 * iTc, iTc);
+      iDelta = WELS_CLIP3 (((((q[0] - p[0]) * (1 << 2)) + (p[1] - q[1]) + 4) >> 3), -1 * iTc, iTc);
       pPixCr[iStrideX * -1] = WELS_CLIP3 ((p[0] + iDelta), 0, 255);
       pPixCr[iStrideX * 0 ] = WELS_CLIP3 ((q[0] - iDelta), 0, 255);
     }
@@ -721,6 +721,10 @@ TEST (DecoderDeblocking, FilteringEdgeLumaHV) {
   sDqLayer.iMbY = 0; //Only for test easy
   sDqLayer.iMbXyIndex = 1;  // this function has NO iMbXyIndex validation
 
+  bool bTSize8x8Flag[50] = {false};
+  sDqLayer.pTransformSize8x8Flag = bTSize8x8Flag;
+  sDqLayer.pTransformSize8x8Flag[sDqLayer.iMbXyIndex] = false;
+
 #define UT_DB_LUMA_TEST(iFlag, iQP, iV0, iV1, iV2) \
   iBoundryFlag = iFlag; \
   memset(iLumaQP, iQP, sizeof(int8_t)*50); \
@@ -769,6 +773,8 @@ TEST (DecoderDeblocking, DeblockingBsMarginalMBAvcbase) {
   int8_t iNoZeroCount[24 * 2]; // (*pNzc)[24]
   int8_t iLayerRefIndex[2][16 * 2]; // (*pRefIndex[LIST_A])[MB_BLOCK4x4_NUM];
   int16_t iLayerMv[2][16 * 2][2]; //(*pMv[LIST_A])[MB_BLOCK4x4_NUM][MV_A];
+  uint32_t uiBSx4;
+  uint8_t* pBS = (uint8_t*) (&uiBSx4);
 
   sDqLayer.pNzc = (int8_t (*)[24])iNoZeroCount;
   sDqLayer.pRefIndex[0] = (int8_t (*)[16])&iLayerRefIndex[0];
@@ -777,10 +783,18 @@ TEST (DecoderDeblocking, DeblockingBsMarginalMBAvcbase) {
   sDqLayer.pMv[0] = (int16_t (*) [16][2])&iLayerMv[0];
   sDqLayer.pMv[1] = (int16_t (*) [16][2])&iLayerMv[1];
 
+  bool bTSize8x8Flag[50] = {false};
+  sDqLayer.pTransformSize8x8Flag = bTSize8x8Flag;
+  memset (bTSize8x8Flag, 0, sizeof (bool) * 50);
+
 #define UT_DB_CLEAN_STATUS \
   memset(iNoZeroCount, 0, sizeof(int8_t)*24*2); \
   memset(iLayerRefIndex, 0, sizeof(int8_t)*2*16*2); \
   memset(iLayerMv, 0, sizeof(int16_t)*2*16*2*2);
+
+#define SET_REF_VALUE(value, pos) \
+  uiBSx4 = 0; \
+  pBS[pos] = value;
 
   int32_t iCurrBlock, iNeighborBlock;
 
@@ -793,21 +807,24 @@ TEST (DecoderDeblocking, DeblockingBsMarginalMBAvcbase) {
       // (1) iEdge == 0, current block NoZeroCount != 0
       UT_DB_CLEAN_STATUS
       iNoZeroCount[0 * 24 + iCurrBlock] = 1; // Current MB_block position
+      SET_REF_VALUE(2, iPos);
       EXPECT_TRUE (DeblockingBsMarginalMBAvcbase (&sDqLayer, iEdge, 1,
-                   0) == (2u << (iPos * 8))) << iEdge << " " << iPos << " NoZeroCount!=0";
+                   0) == uiBSx4) << iEdge << " " << iPos << " NoZeroCount!=0";
 
       // (2) iEdge == 0, neighbor block NoZeroCount != 0
       UT_DB_CLEAN_STATUS
       iNoZeroCount[1 * 24 + iNeighborBlock ] = 1; // Neighbor MB_block position
+      SET_REF_VALUE(2, iPos);
       EXPECT_TRUE (DeblockingBsMarginalMBAvcbase (&sDqLayer, iEdge, 1,
-                   0) == (2u << (iPos * 8))) << iEdge << " " << iPos << " NoZeroCount!=0";
+                   0) == uiBSx4) << iEdge << " " << iPos << " NoZeroCount!=0";
 
       // (3) iEdge == 0, reference idx diff
       UT_DB_CLEAN_STATUS
       iLayerRefIndex[0][0 * 16 + iCurrBlock] = 0;
       iLayerRefIndex[0][1 * 16 + iNeighborBlock] = 1;
+      SET_REF_VALUE(1, iPos);
       EXPECT_TRUE (DeblockingBsMarginalMBAvcbase (&sDqLayer, iEdge, 1,
-                   0) == (1u << (iPos * 8))) << iEdge << " " << iPos << " Ref idx diff";
+                   0) == uiBSx4) << iEdge << " " << iPos << " Ref idx diff";
 
       // (4) iEdge == 0, abs(mv diff) < 4
       UT_DB_CLEAN_STATUS
@@ -829,35 +846,41 @@ TEST (DecoderDeblocking, DeblockingBsMarginalMBAvcbase) {
       // (5) iEdge == 0, abs(mv diff) > 4
       UT_DB_CLEAN_STATUS
       iLayerMv[0][0 * 16 + iCurrBlock][0] = 4;
+      SET_REF_VALUE(1, iPos);
       EXPECT_TRUE (DeblockingBsMarginalMBAvcbase (&sDqLayer, iEdge, 1,
-                   0) == (1u << (iPos * 8))) << iEdge << " " << iPos << " diff_mv == 4";
+                   0) == uiBSx4) << iEdge << " " << iPos << " diff_mv == 4";
 
       UT_DB_CLEAN_STATUS
       iLayerMv[0][0 * 16 + iCurrBlock][1] = 4;
+      SET_REF_VALUE(1, iPos);
       EXPECT_TRUE (DeblockingBsMarginalMBAvcbase (&sDqLayer, iEdge, 1,
-                   0) == (1u << (iPos * 8))) << iEdge << " " << iPos << " diff_mv == 4";
+                   0) == uiBSx4) << iEdge << " " << iPos << " diff_mv == 4";
 
       UT_DB_CLEAN_STATUS
       iLayerMv[0][1 * 16 + iNeighborBlock][0] = 4;
+      SET_REF_VALUE(1, iPos);
       EXPECT_TRUE (DeblockingBsMarginalMBAvcbase (&sDqLayer, iEdge, 1,
-                   0) == (1u << (iPos * 8))) << iEdge << " " << iPos << " diff_mv == 4";
+                   0) == uiBSx4) << iEdge << " " << iPos << " diff_mv == 4";
 
       UT_DB_CLEAN_STATUS
       iLayerMv[0][1 * 16 + iNeighborBlock][1] = 4;
+      SET_REF_VALUE(1, iPos);
       EXPECT_TRUE (DeblockingBsMarginalMBAvcbase (&sDqLayer, iEdge, 1,
-                   0) == (1u << (iPos * 8))) << iEdge << " " << iPos << " diff_mv == 4";
+                   0) == uiBSx4) << iEdge << " " << iPos << " diff_mv == 4";
 
       UT_DB_CLEAN_STATUS
       iLayerMv[0][0 * 16 + iCurrBlock][0] = -2048;
       iLayerMv[0][1 * 16 + iNeighborBlock][0] = 2047;
+      SET_REF_VALUE(1, iPos);
       EXPECT_TRUE (DeblockingBsMarginalMBAvcbase (&sDqLayer, iEdge, 1,
-                   0) == (1u << (iPos * 8))) << iEdge << " " << iPos << " diff_mv == maximum";
+                   0) == uiBSx4) << iEdge << " " << iPos << " diff_mv == maximum";
 
       UT_DB_CLEAN_STATUS
       iLayerMv[0][0 * 16 + iCurrBlock][1] = -2048;
       iLayerMv[0][1 * 16 + iNeighborBlock][1] = 2047;
+      SET_REF_VALUE(1, iPos);
       EXPECT_TRUE (DeblockingBsMarginalMBAvcbase (&sDqLayer, iEdge, 1,
-                   0) == (1u << (iPos * 8))) << iEdge << " " << iPos << " diff_mv == maximum";
+                   0) == uiBSx4) << iEdge << " " << iPos << " diff_mv == maximum";
     }
   }
 }
@@ -883,6 +906,10 @@ TEST (Deblocking, WelsDeblockingMb) {
   sDqLayer.iMbXyIndex = 1;
   sDqLayer.iMbWidth = 1;
 
+  bool bTSize8x8Flag[50] = {false};
+  sDqLayer.pTransformSize8x8Flag = bTSize8x8Flag;
+  memset (bTSize8x8Flag, 0, sizeof (bool) * 50);
+
   uint8_t iY[50] = {0};
   sFilter.pCsData[0] = iY;
   sFilter.iCsStride[0] = 4;
@@ -898,10 +925,10 @@ TEST (Deblocking, WelsDeblockingMb) {
   sDqLayer.pLumaQp = iLumaQP;
   sDqLayer.pChromaQp = iChromaQP;
 
-  int8_t iMbType[2];
+  int16_t iMbType[2];
   sDqLayer.pMbType = iMbType;
-  sDqLayer.pMbType[0] = 0x01;
-  sDqLayer.pMbType[1] = 0x01;
+  sDqLayer.pMbType[0] = MB_TYPE_INTRA4x4;
+  sDqLayer.pMbType[1] = MB_TYPE_INTRA4x4;
 
   sFilter.iSliceAlphaC0Offset = 0;
   sFilter.iSliceBetaOffset = 0;
@@ -922,31 +949,31 @@ TEST (Deblocking, WelsDeblockingMb) {
   EXPECT_TRUE(iCb[2<<1]==iChromaV1 && iCr[2<<1]==iChromaV1)<<iQP<<" "<<sDqLayer.pMbType[1]; \
   EXPECT_TRUE(iCb[(2<<1)*sFilter.iCsStride[1]]==iChromaV2 && iCr[(2<<1)*sFilter.iCsStride[1]]==iChromaV2)<<iQP<<" "<<sDqLayer.pMbType[1];
 
-  // QP>16, LEFT & TOP, Intra mode 0x01
+  // QP>16, LEFT & TOP, Intra mode MB_TYPE_INTRA4x4
   iQP = 16 + rand() % 35;
-  sDqLayer.pMbType[1] = 0x01;
+  sDqLayer.pMbType[1] = MB_TYPE_INTRA4x4;
   UT_DB_MACROBLOCK_TEST (0x03, iQP, 2, 1, 1, 2, 1, 1)
 
-  // QP>16, LEFT & TOP, Intra mode 0x02
+  // QP>16, LEFT & TOP, Intra mode MB_TYPE_INTRA16x16
   iQP = 16 + rand() % 35;
-  sDqLayer.pMbType[1] = 0x02;
+  sDqLayer.pMbType[1] = MB_TYPE_INTRA16x16;
   UT_DB_MACROBLOCK_TEST (0x03, iQP, 2, 1, 1, 2, 1, 1)
 
   // MbType==0x03, Intra8x8 has not been supported now.
 
-  // QP>16, LEFT & TOP, Intra mode 0x04
+  // QP>16, LEFT & TOP, Intra mode MB_TYPE_INTRA_PCM
   iQP = 16 + rand() % 35;
-  sDqLayer.pMbType[1] = 0x04;
+  sDqLayer.pMbType[1] = MB_TYPE_INTRA_PCM;
   UT_DB_MACROBLOCK_TEST (0x03, iQP, 2, 1, 1, 2, 1, 1)
 
   // QP>16, LEFT & TOP, neighbor is Intra
   iQP = 16 + rand() % 35;
-  sDqLayer.pMbType[0] = 0x02;
-  sDqLayer.pMbType[1] = 0x0f; // Internal SKIP, Bs==0
+  sDqLayer.pMbType[0] = MB_TYPE_INTRA16x16;
+  sDqLayer.pMbType[1] = MB_TYPE_SKIP; // Internal SKIP, Bs==0
   UT_DB_MACROBLOCK_TEST (0x03, iQP, 2, 0, 0, 2, 0, 0)
 
   // QP<15, no output
   iQP = rand() % 16;
-  sDqLayer.pMbType[1] = 0x04;
+  sDqLayer.pMbType[1] = MB_TYPE_INTRA_PCM;
   UT_DB_MACROBLOCK_TEST (0x03, iQP, 0, 0, 0, 0, 0, 0)
 }

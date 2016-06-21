@@ -100,24 +100,24 @@ int32_t   iFrameAverageQp;
 /*******************************for screen reference frames****************************/
 SScreenBlockFeatureStorage* pScreenBlockFeatureStorage;
   /*
-   *	set picture as unreferenced
+   *    set picture as unreferenced
    */
   void SetUnref () {
-      iFramePoc		= -1;
-      iFrameNum		= -1;
+      iFramePoc          = -1;
+      iFrameNum          = -1;
 
 // RTI change; needed explicit data type cast for assignments
       uiTemporalId	= (uint8_t)-1;
         uiSpatialId		= (uint8_t)-1;
         iLongTermPicNum = (uint8_t)-1;
 
-      bIsLongRef	= false;
+      bIsLongRef         = false;
       uiRecieveConfirmed = RECIEVE_FAILED;
-      iMarkFrameNum = -1;
-      bUsedAsRef	= false;
+      iMarkFrameNum      = -1;
+      bUsedAsRef         = false;
 
       if (NULL != pScreenBlockFeatureStorage)
-        pScreenBlockFeatureStorage->bRefBlockFeatureCalculated	= false;
+        pScreenBlockFeatureStorage->bRefBlockFeatureCalculated = false;
   }
 } SPicture;
 

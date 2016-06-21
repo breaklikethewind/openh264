@@ -28,7 +28,7 @@
  *     ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *     POSSIBILITY OF SUCH DAMAGE.
  *
- *	cabac_decoder.cpp:	deals with cabac state transition and related functions
+ *      cabac_decoder.cpp:      deals with cabac state transition and related functions
  */
 #include "cabac_decoder.h"
 namespace WelsDec {
@@ -78,7 +78,7 @@ int32_t InitCabacDecEngineFromBS (PWelsCabacDecEngine pDecEngine, PBitStringAux 
   uint8_t* pCurr;
 
   pCurr = pBsAux->pCurBuf - iRemainingBytes;
-  if(pCurr >= (pBsAux->pEndBuf - 1)) {
+  if (pCurr >= (pBsAux->pEndBuf - 1)) {
     return ERR_INFO_INVALID_ACCESS;
   }
   pDecEngine->uiOffset = ((pCurr[0] << 16) | (pCurr[1] << 8) | pCurr[2]);
@@ -277,7 +277,10 @@ int32_t DecodeExpBypassCabac (PWelsCabacDecEngine pDecEngine, int32_t iCount, ui
       iSymTmp += (1 << iCount);
       ++iCount;
     }
-  } while (uiCode != 0);
+  } while (uiCode != 0 && iCount != 16);
+  if (iCount == 16) {
+    return ERR_CABAC_UNEXPECTED_VALUE;
+  }
 
   while (iCount--) {
     WELS_READ_VERIFY (DecodeBypassCabac (pDecEngine, uiCode));

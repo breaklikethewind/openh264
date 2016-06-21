@@ -29,11 +29,11 @@
  *     POSSIBILITY OF SUCH DAMAGE.
  *
  *
- * \file	WelsThreadLib.c
+ * \file    WelsThreadLib.c
  *
- * \brief	Interfaces introduced in thread programming
+ * \brief   Interfaces introduced in thread programming
  *
- * \date	11/17/2009 Created
+ * \date    11/17/2009 Created
  *
  *************************************************************************************
  */
@@ -297,12 +297,12 @@ WELS_THREAD_ERROR_CODE    WelsEventOpen (WELS_EVENT* p_event, const char* event_
 }
 WELS_THREAD_ERROR_CODE    WelsEventClose (WELS_EVENT* event, const char* event_name) {
 #ifdef __APPLE__
-  WELS_THREAD_ERROR_CODE err = sem_close (*event);	// match with sem_open
+  WELS_THREAD_ERROR_CODE err = sem_close (*event); // match with sem_open
   if (event_name)
     sem_unlink (event_name);
   return err;
 #else
-  WELS_THREAD_ERROR_CODE err = sem_destroy (*event);	// match with sem_init
+  WELS_THREAD_ERROR_CODE err = sem_destroy (*event); // match with sem_init
   free (*event);
   return err;
 #endif
@@ -310,17 +310,17 @@ WELS_THREAD_ERROR_CODE    WelsEventClose (WELS_EVENT* event, const char* event_n
 
 WELS_THREAD_ERROR_CODE   WelsEventSignal (WELS_EVENT* event) {
   WELS_THREAD_ERROR_CODE err = 0;
-//	int32_t val = 0;
-//	sem_getvalue(event, &val);
-//	fprintf( stderr, "before signal it, val= %d..\n",val );
+//  int32_t val = 0;
+//  sem_getvalue(event, &val);
+//  fprintf( stderr, "before signal it, val= %d..\n",val );
   err = sem_post (*event);
-//	sem_getvalue(event, &val);
-//	fprintf( stderr, "after signal it, val= %d..\n",val );
+//  sem_getvalue(event, &val);
+//  fprintf( stderr, "after signal it, val= %d..\n",val );
   return err;
 }
 
 WELS_THREAD_ERROR_CODE   WelsEventWait (WELS_EVENT* event) {
-  return sem_wait (*event);	// blocking until signaled
+  return sem_wait (*event); // blocking until signaled
 }
 
 WELS_THREAD_ERROR_CODE    WelsEventWaitWithTimeOut (WELS_EVENT* event, uint32_t dwMilliseconds) {
@@ -358,7 +358,7 @@ WELS_THREAD_ERROR_CODE    WelsEventWaitWithTimeOut (WELS_EVENT* event, uint32_t 
 WELS_THREAD_ERROR_CODE    WelsMultipleEventsWaitSingleBlocking (uint32_t nCount,
     WELS_EVENT* event_list, WELS_EVENT* master_event) {
   uint32_t nIdx = 0;
-  uint32_t uiAccessTime = 2;	// 2 us once
+  uint32_t uiAccessTime = 2; // 2 us once
 
   if (nCount == 0)
     return WELS_THREAD_ERROR_WAIT_FAILED;
@@ -376,7 +376,7 @@ WELS_THREAD_ERROR_CODE    WelsMultipleEventsWaitSingleBlocking (uint32_t nCount,
   }
 
   while (1) {
-    nIdx = 0;	// access each event by order
+    nIdx = 0; // access each event by order
     while (nIdx < nCount) {
       int32_t err = 0;
       int32_t wait_count = 0;
@@ -397,7 +397,7 @@ WELS_THREAD_ERROR_CODE    WelsMultipleEventsWaitSingleBlocking (uint32_t nCount,
       // we do need access next event next time
       ++ nIdx;
     }
-    usleep (1);	// switch to working threads
+    usleep (1); // switch to working threads
     if (master_event != NULL) {
       // A master event was used and was signalled, but none of the events in the
       // list was found to be signalled, thus wait a little more when rechecking
@@ -415,19 +415,19 @@ WELS_THREAD_ERROR_CODE    WelsMultipleEventsWaitAllBlocking (uint32_t nCount,
     WELS_EVENT* event_list, WELS_EVENT* master_event) {
   uint32_t nIdx = 0;
   uint32_t uiCountSignals = 0;
-  uint32_t uiSignalFlag	= 0;	// UGLY: suppose maximal event number up to 32
+  uint32_t uiSignalFlag = 0;    // UGLY: suppose maximal event number up to 32
 
   if (nCount == 0 || nCount > (sizeof (uint32_t) << 3))
     return WELS_THREAD_ERROR_WAIT_FAILED;
 
   while (1) {
-    nIdx = 0;	// access each event by order
+    nIdx = 0; // access each event by order
     while (nIdx < nCount) {
       const uint32_t kuiBitwiseFlag = (1 << nIdx);
 
       if ((uiSignalFlag & kuiBitwiseFlag) != kuiBitwiseFlag) { // non-blocking mode
         int32_t err = 0;
-//				fprintf( stderr, "sem_wait(): start to wait event %d..\n", nIdx );
+//        fprintf( stderr, "sem_wait(): start to wait event %d..\n", nIdx );
         if (master_event == NULL) {
           err = sem_wait (event_list[nIdx]);
         } else {
@@ -443,11 +443,11 @@ WELS_THREAD_ERROR_CODE    WelsMultipleEventsWaitAllBlocking (uint32_t nCount,
             }
           }
         }
-//				fprintf( stderr, "sem_wait(): wait event %d result %d errno %d..\n", nIdx, err, errno );
+//        fprintf( stderr, "sem_wait(): wait event %d result %d errno %d..\n", nIdx, err, errno );
         if (WELS_THREAD_ERROR_OK == err) {
-//					int32_t val = 0;
-//					sem_getvalue(&event_list[nIdx], &val);
-//					fprintf( stderr, "after sem_timedwait(), event_list[%d] semaphore value= %d..\n", nIdx, val);
+//          int32_t val = 0;
+//          sem_getvalue(&event_list[nIdx], &val);
+//          fprintf( stderr, "after sem_timedwait(), event_list[%d] semaphore value= %d..\n", nIdx, val);
 
           uiSignalFlag |= kuiBitwiseFlag;
           ++ uiCountSignals;
@@ -474,18 +474,39 @@ WELS_THREAD_ERROR_CODE    WelsQueryLogicalProcessInfo (WelsLogicalProcessInfo* p
 
   CPU_ZERO (&cpuset);
 
-  if (!sched_getaffinity (0, sizeof (cpuset), &cpuset))
+  if (!sched_getaffinity (0, sizeof (cpuset), &cpuset)) {
+#ifdef CPU_COUNT
     pInfo->ProcessorCount = CPU_COUNT (&cpuset);
-  else
+#else
+    int32_t count = 0;
+    for (int i = 0; i < CPU_SETSIZE; i++) {
+      if (CPU_ISSET(i, &cpuset)) {
+        count++;
+      }
+    }
+    pInfo->ProcessorCount = count;
+#endif
+  } else {
     pInfo->ProcessorCount = 1;
+  }
 
   return WELS_THREAD_ERROR_OK;
 
+#elif defined(__EMSCRIPTEN__)
+
+  // There is not yet a way to determine CPU count in emscripten JS environment.
+  pInfo->ProcessorCount = 1;
+  return WELS_THREAD_ERROR_OK;
 #else
 
   size_t len = sizeof (pInfo->ProcessorCount);
 
+#if defined(__OpenBSD__)
+  int scname[] = { CTL_HW, HW_NCPU };
+  if (sysctl (scname, 2, &pInfo->ProcessorCount, &len, NULL, 0) == -1)
+#else
   if (sysctlbyname (HW_NCPU_NAME, &pInfo->ProcessorCount, &len, NULL, 0) == -1)
+#endif
     pInfo->ProcessorCount = 1;
 
   return WELS_THREAD_ERROR_OK;

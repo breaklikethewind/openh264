@@ -59,7 +59,7 @@ extern "C" {
 #include "manage_dec_ref.h"
 }
 #include "error_code.h"
-#include "crt_util_safe_x.h"	// Safe CRT routines like util for cross platforms
+#include "crt_util_safe_x.h" // Safe CRT routines like util for cross platforms
 #include <time.h>
 #if defined(_WIN32) /*&& defined(_DEBUG)*/
 
@@ -83,16 +83,16 @@ namespace WelsDec {
 //////////////////////////////////////////////////////////////////////
 
 /***************************************************************************
-*	Description:
-*			class CWelsDecoder constructor function, do initialization	and
+*   Description:
+*       class CWelsDecoder constructor function, do initialization  and
 *       alloc memory required
 *
-*	Input parameters: none
+*   Input parameters: none
 *
-*	return: none
+*   return: none
 ***************************************************************************/
 CWelsDecoder::CWelsDecoder (void)
-  :	m_pDecContext (NULL),
+  : m_pDecContext (NULL),
     m_pWelsTrace (NULL) {
 #ifdef OUTPUT_BIT_STREAM
   char chFileName[1024] = { 0 };  //for .264
@@ -107,7 +107,7 @@ CWelsDecoder::CWelsDecoder (void)
 #endif//OUTPUT_BIT_STREAM
 
 
-  m_pWelsTrace	= new welsCodecTrace();
+  m_pWelsTrace = new welsCodecTrace();
   if (m_pWelsTrace != NULL) {
     m_pWelsTrace->SetCodecInstance (this);
     m_pWelsTrace->SetTraceLevel (WELS_LOG_ERROR);
@@ -160,12 +160,12 @@ CWelsDecoder::CWelsDecoder (void)
 }
 
 /***************************************************************************
-*	Description:
-*			class CWelsDecoder destructor function, destroy allocced memory
+*   Description:
+*       class CWelsDecoder destructor function, destroy allocced memory
 *
-*	Input parameters: none
+*   Input parameters: none
 *
-*	return: none
+*   return: none
 ***************************************************************************/
 CWelsDecoder::~CWelsDecoder() {
   if (m_pWelsTrace != NULL) {
@@ -224,15 +224,22 @@ void CWelsDecoder::UninitDecoder (void) {
   if (NULL == m_pDecContext)
     return;
 
-  WelsLog (&m_pWelsTrace->m_sLogCtx, WELS_LOG_INFO, "CWelsDecoder::uninit_decoder(), openh264 codec version = %s.",
+  WelsLog (&m_pWelsTrace->m_sLogCtx, WELS_LOG_INFO, "CWelsDecoder::UninitDecoder(), openh264 codec version = %s.",
            VERSION_NUMBER);
 
   WelsEndDecoder (m_pDecContext);
+  if (m_pDecContext->pMemAlign != NULL) {
+    WelsLog (&m_pWelsTrace->m_sLogCtx, WELS_LOG_INFO,
+             "CWelsDecoder::UninitDecoder(), verify memory usage (%d bytes) after free..",
+             m_pDecContext->pMemAlign->WelsGetMemoryUsage());
+    delete m_pDecContext->pMemAlign;
+    m_pDecContext->pMemAlign = NULL;
+  }
 
   if (NULL != m_pDecContext) {
     WelsFree (m_pDecContext, "m_pDecContext");
 
-    m_pDecContext	= NULL;
+    m_pDecContext = NULL;
   }
 
 }
@@ -240,17 +247,39 @@ void CWelsDecoder::UninitDecoder (void) {
 // the return value of this function is not suitable, it need report failure info to upper layer.
 int32_t CWelsDecoder::InitDecoder (const bool bParseOnly) {
 
-  WelsLog (&m_pWelsTrace->m_sLogCtx, WELS_LOG_INFO, "CWelsDecoder::init_decoder(), openh264 codec version = %s",
-           VERSION_NUMBER);
+  WelsLog (&m_pWelsTrace->m_sLogCtx, WELS_LOG_INFO,
+           "CWelsDecoder::init_decoder(), openh264 codec version = %s, ParseOnly = %d",
+           VERSION_NUMBER, (int32_t)bParseOnly);
 
   if (m_pDecContext) //free
     UninitDecoder();
-  m_pDecContext	= (PWelsDecoderContext)WelsMallocz (sizeof (SWelsDecoderContext), "m_pDecContext");
+  m_pDecContext = (PWelsDecoderContext)WelsMallocz (sizeof (SWelsDecoderContext), "m_pDecContext");
   if (NULL == m_pDecContext)
     return cmMallocMemeError;
+  int32_t iCacheLineSize = 16;   // on chip cache line size in byte
+  m_pDecContext->pMemAlign = new CMemoryAlign (iCacheLineSize);
+  WELS_VERIFY_RETURN_PROC_IF (1, (NULL == m_pDecContext->pMemAlign), UninitDecoder())
 
   return WelsInitDecoder (m_pDecContext, bParseOnly, &m_pWelsTrace->m_sLogCtx);
+}
 
+int32_t CWelsDecoder::ResetDecoder() {
+  // TBC: need to be modified when context and trace point are null
+  if (m_pDecContext != NULL && m_pWelsTrace != NULL) {
+    WelsLog (&m_pWelsTrace->m_sLogCtx, WELS_LOG_INFO, "ResetDecoder(), context error code is %d",
+             m_pDecContext->iErrorCode);
+    SDecodingParam sPrevParam;
+    memcpy (&sPrevParam, m_pDecContext->pParam, sizeof (SDecodingParam));
+
+    int32_t iRet = InitDecoder (m_pDecContext->bParseOnly);
+    if (iRet)
+      return iRet;
+
+    return DecoderConfigParam (m_pDecContext, &sPrevParam);
+  } else if (m_pWelsTrace != NULL) {
+    WelsLog (&m_pWelsTrace->m_sLogCtx, WELS_LOG_ERROR, "ResetDecoder() failed as decoder context null");
+  }
+  return ERR_INFO_UNINIT;
 }
 
 /*
@@ -272,25 +301,25 @@ long CWelsDecoder::SetOption (DECODER_OPTION eOptID, void* pOption) {
     if (pOption == NULL)
       return cmInitParaError;
 
-    iVal = * ((int*)pOption);	// is_rgb
+    iVal = * ((int*)pOption); // is_rgb
 
     return DecoderSetCsp (m_pDecContext, iVal);
   } else if (eOptID == DECODER_OPTION_END_OF_STREAM) { // Indicate bit-stream of the final frame to be decoded
     if (pOption == NULL)
       return cmInitParaError;
 
-    iVal	= * ((int*)pOption);	// boolean value for whether enabled End Of Stream flag
+    iVal = * ((int*)pOption); // boolean value for whether enabled End Of Stream flag
 
-    m_pDecContext->bEndOfStreamFlag	= iVal ? true : false;
+    m_pDecContext->bEndOfStreamFlag = iVal ? true : false;
 
     return cmResultSuccess;
   } else if (eOptID == DECODER_OPTION_ERROR_CON_IDC) { // Indicate error concealment status
     if (pOption == NULL)
       return cmInitParaError;
 
-    iVal	= * ((int*)pOption);	// int value for error concealment idc
+    iVal = * ((int*)pOption); // int value for error concealment idc
     iVal = WELS_CLIP3 (iVal, (int32_t) ERROR_CON_DISABLE, (int32_t) ERROR_CON_SLICE_MV_COPY_CROSS_IDR_FREEZE_RES_CHANGE);
-    m_pDecContext->eErrorConMethod = (ERROR_CON_IDC) iVal;
+    m_pDecContext->pParam->eEcActiveIdc = m_pDecContext->eErrorConMethod = (ERROR_CON_IDC) iVal;
     if ((m_pDecContext->bParseOnly) && (m_pDecContext->eErrorConMethod != ERROR_CON_DISABLE)) {
       WelsLog (&m_pWelsTrace->m_sLogCtx, WELS_LOG_INFO,
                "CWelsDecoder::SetOption for ERROR_CON_IDC = %d not allowd for parse only!.", iVal);
@@ -330,7 +359,7 @@ long CWelsDecoder::SetOption (DECODER_OPTION eOptID, void* pOption) {
 }
 
 /*
- *	Get Option
+ *  Get Option
  */
 long CWelsDecoder::GetOption (DECODER_OPTION eOptID, void* pOption) {
   int iVal = 0;
@@ -343,11 +372,11 @@ long CWelsDecoder::GetOption (DECODER_OPTION eOptID, void* pOption) {
 
   if (DECODER_OPTION_DATAFORMAT == eOptID) {
     iVal = (int32_t) m_pDecContext->eOutputColorFormat;
-    * ((int*)pOption)	= iVal;
+    * ((int*)pOption) = iVal;
     return cmResultSuccess;
   } else if (DECODER_OPTION_END_OF_STREAM == eOptID) {
-    iVal	= m_pDecContext->bEndOfStreamFlag;
-    * ((int*)pOption)	= iVal;
+    iVal = m_pDecContext->bEndOfStreamFlag;
+    * ((int*)pOption) = iVal;
     return cmResultSuccess;
   }
 #ifdef LONG_TERM_REF
@@ -402,13 +431,20 @@ DECODING_STATE CWelsDecoder::DecodeFrameNoDelay (const unsigned char* kpSrc,
     unsigned char** ppDst,
     SBufferInfo* pDstInfo) {
   int iRet;
-  SBufferInfo sTmpBufferInfo;
+  //SBufferInfo sTmpBufferInfo;
+  //unsigned char* ppTmpDst[3] = {NULL, NULL, NULL};
   iRet = (int) DecodeFrame2 (kpSrc, kiSrcLen, ppDst, pDstInfo);
-  memcpy (&sTmpBufferInfo, pDstInfo, sizeof (SBufferInfo));
+  //memcpy (&sTmpBufferInfo, pDstInfo, sizeof (SBufferInfo));
+  //ppTmpDst[0] = ppDst[0];
+  //ppTmpDst[1] = ppDst[1];
+  //ppTmpDst[2] = ppDst[2];
   iRet |= DecodeFrame2 (NULL, 0, ppDst, pDstInfo);
-  if ((pDstInfo->iBufferStatus == 0) && (sTmpBufferInfo.iBufferStatus == 1)) {
-    memcpy (pDstInfo, &sTmpBufferInfo, sizeof (SBufferInfo));
-  }
+  //if ((pDstInfo->iBufferStatus == 0) && (sTmpBufferInfo.iBufferStatus == 1)) {
+  //memcpy (pDstInfo, &sTmpBufferInfo, sizeof (SBufferInfo));
+  //ppDst[0] = ppTmpDst[0];
+  //ppDst[1] = ppTmpDst[1];
+  //ppDst[2] = ppTmpDst[2];
+  //}
 
   return (DECODING_STATE) iRet;
 }
@@ -467,12 +503,12 @@ DECODING_STATE CWelsDecoder::DecodeFrame2 (const unsigned char* kpSrc,
   m_pDecContext->bInstantDecFlag = false; //reset no-delay flag
   if (m_pDecContext->iErrorCode) {
     EWelsNalUnitType eNalType =
-      NAL_UNIT_UNSPEC_0;	//for NBR, IDR frames are expected to decode as followed if error decoding an IDR currently
+      NAL_UNIT_UNSPEC_0; //for NBR, IDR frames are expected to decode as followed if error decoding an IDR currently
 
-    eNalType	= m_pDecContext->sCurNalHead.eNalUnitType;
+    eNalType = m_pDecContext->sCurNalHead.eNalUnitType;
 
     if (m_pDecContext->iErrorCode & dsOutOfMemory) {
-      ForceResetParaSetStatusAndAUList (m_pDecContext);
+      ResetDecoder();
     }
     //for AVC bitstream (excluding AVC with temporal scalability, including TP), as long as error occur, SHOULD notify upper layer key frame loss.
     if ((IS_PARAM_SETS_NALS (eNalType) || NAL_UNIT_CODED_SLICE_IDR == eNalType) ||
@@ -631,7 +667,7 @@ DECODING_STATE CWelsDecoder::DecodeFrameEx (const unsigned char* kpSrc,
     int& iWidth,
     int& iHeight,
     int& iColorFormat) {
-  DECODING_STATE	 state = dsErrorFree;
+  DECODING_STATE state = dsErrorFree;
 
   return state;
 }
@@ -662,8 +698,8 @@ int WelsGetDecoderCapability (SDecoderCapability* pDecCapability) {
 /* WINAPI is indeed in prefix due to sync to application layer callings!! */
 
 /*
-*	WelsCreateDecoder
-*	@return:	success in return 0, otherwise failed.
+*   WelsCreateDecoder
+*   @return:    success in return 0, otherwise failed.
 */
 long WelsCreateDecoder (ISVCDecoder** ppDecoder) {
 
@@ -671,7 +707,7 @@ long WelsCreateDecoder (ISVCDecoder** ppDecoder) {
     return ERR_INVALID_PARAMETERS;
   }
 
-  *ppDecoder	= new CWelsDecoder();
+  *ppDecoder = new CWelsDecoder();
 
   if (NULL == *ppDecoder) {
     return ERR_MALLOC_FAILED;
@@ -681,7 +717,7 @@ long WelsCreateDecoder (ISVCDecoder** ppDecoder) {
 }
 
 /*
-*	WelsDestroyDecoder
+*   WelsDestroyDecoder
 */
 void WelsDestroyDecoder (ISVCDecoder* pDecoder) {
   if (NULL != pDecoder) {

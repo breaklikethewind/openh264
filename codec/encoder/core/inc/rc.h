@@ -67,7 +67,7 @@ enum {
 //qp information
   GOM_MIN_QP_MODE       = 12,
   GOM_MAX_QP_MODE       = 36,
-  MAX_LOW_BR_QP			= 42,
+  MAX_LOW_BR_QP         = 42,
   MIN_IDR_QP            = 26,
   MAX_IDR_QP            = 32,
   MIN_SCREEN_QP         = 26,
@@ -190,14 +190,13 @@ int32_t   iMinFrameQp;
 int32_t   iMaxFrameQp;
 int32_t   iNumberMbFrame;
 int32_t   iNumberMbGom;
-int32_t	  iSliceNum;
+int32_t   iSliceNum;
 int32_t   iGomSize;
 int32_t   iSkipFrameNum;
 int32_t   iFrameCodedInVGop;
 int32_t   iSkipFrameInVGop;
 int32_t   iGopNumberInVGop;
 int32_t   iGopIndexInVGop;
- 
 int32_t   iSkipQpValue;
 int32_t   iQpRangeUpperInFrame;
 int32_t   iQpRangeLowerInFrame;
@@ -220,7 +219,7 @@ int32_t   iBufferFullnessPadding;
 int32_t   iPaddingSize;
 int32_t   iPaddingBitrateStat;
 bool      bSkipFlag;
-SRCSlicing*	pSlicingOverRc;
+SRCSlicing*     pSlicingOverRc;
 SRCTemporal* pTemporalOverRc;
 //for scc
 int64_t     iAvgCost2Bits;
@@ -241,22 +240,27 @@ typedef  bool (*PWelsCheckFrameSkipBasedMaxbrFunc) (sWelsEncCtx* pCtx, int32_t i
                                    const uint32_t uiTimeStamp);
 typedef  void (*PWelsUpdateBufferWhenFrameSkippedFunc)(sWelsEncCtx* pCtx, int32_t iSpatialNum);
 typedef  void (*PWelsUpdateMaxBrCheckWindowStatusFunc)(sWelsEncCtx* pCtx, int32_t iSpatialNum, const long long uiTimeStamp);
+typedef  bool (*PWelsRCPostFrameSkippingFunc)(sWelsEncCtx* pCtx, const int32_t iDid, const long long uiTimeStamp);
 typedef  struct  WelsRcFunc_s {
-PWelsRCPictureInitFunc			pfWelsRcPictureInit;
-PWelsRCPictureDelayJudgeFunc      pfWelsRcPicDelayJudge;
-PWelsRCPictureInfoUpdateFunc	pfWelsRcPictureInfoUpdate;
-PWelsRCMBInitFunc				pfWelsRcMbInit;
-PWelsRCMBInfoUpdateFunc			pfWelsRcMbInfoUpdate;
+PWelsRCPictureInitFunc          pfWelsRcPictureInit;
+PWelsRCPictureDelayJudgeFunc    pfWelsRcPicDelayJudge;
+PWelsRCPictureInfoUpdateFunc    pfWelsRcPictureInfoUpdate;
+PWelsRCMBInitFunc               pfWelsRcMbInit;
+PWelsRCMBInfoUpdateFunc         pfWelsRcMbInfoUpdate;
 PWelsCheckFrameSkipBasedMaxbrFunc pfWelsCheckSkipBasedMaxbr;
 PWelsUpdateBufferWhenFrameSkippedFunc pfWelsUpdateBufferWhenSkip;
 PWelsUpdateMaxBrCheckWindowStatusFunc pfWelsUpdateMaxBrWindowStatus;
+PWelsRCPostFrameSkippingFunc    pfWelsRcPostFrameSkipping;
 } SWelsRcFunc;
 bool CheckFrameSkipBasedMaxbr (sWelsEncCtx* pCtx, int32_t iSpatialNum, EVideoFrameType eFrameType,
   const uint32_t uiTimeStamp);
 void UpdateBufferWhenFrameSkipped(sWelsEncCtx* pCtx, int32_t iSpatialNum);
 void UpdateMaxBrCheckWindowStatus(sWelsEncCtx* pCtx, int32_t iSpatialNum, const long long uiTimeStamp);
+bool WelsRcPostFrameSkipping(sWelsEncCtx* pCtx, const int32_t iDid, const long long uiTimeStamp);
+void WelsRcPostFrameSkippedUpdate (sWelsEncCtx* pCtx, const int32_t iDid);
 void RcTraceFrameBits (sWelsEncCtx* pEncCtx, long long uiTimeStamp);
 void WelsRcInitModule (sWelsEncCtx* pCtx, RC_MODES iRcMode);
+void WelsRcInitFuncPointers (sWelsEncCtx* pEncCtx, RC_MODES iRcMode);
 void WelsRcFreeMemory (sWelsEncCtx* pCtx);
 }
 #endif //RC_H
