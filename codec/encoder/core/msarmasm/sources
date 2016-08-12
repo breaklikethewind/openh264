@@ -1,0 +1,29 @@
+!if 0
+Copyright (C) 2007-2010, Freescale Semiconductor, Inc. All Rights Reserved.
+THIS SOURCE CODE, AND ITS USE AND DISTRIBUTION, IS SUBJECT TO THE TERMS
+AND CONDITIONS OF THE APPLICABLE LICENSE AGREEMENT
+!endif
+
+!IF "$(BSP_CODEC_OPENH264)" == ""
+SKIPBUILD=1
+!ELSE
+CDEFINES= $(CDEFINES) -DBSP_CODEC_OPENH264
+!ENDIF
+
+TARGETNAME=oh264_enc_core_neon
+TARGETTYPE=LIBRARY
+RELEASETYPE=DDK
+
+ARM_SOURCES=\
+		memory_neon.s \
+		svc_motion_estimation.s \
+		intra_pred_neon.s \
+		pixel_neon.s \
+		intra_pred_sad_3_opt_neon.s \
+		reconstruct_neon.s
+
+      
+INCLUDES= \
+    ..\..\..\common\msarmasm \
+
+WINCECOD=1

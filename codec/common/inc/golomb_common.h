@@ -76,6 +76,10 @@ static inline int32_t InitBits (SBitStringAux* pBs, const uint8_t* kpBuf, const 
   return kiSize;
 }
 
+// RTI Change
+#ifdef _WIN32_WCE
+#pragma warning( disable : 4127 4244 )
+#endif
 static inline int32_t BsWriteBits (PBitStringAux pBitString, int32_t iLen, const uint32_t kuiValue) {
   if (iLen < pBitString->iLeftBits) {
     pBitString->uiCurBits = (pBitString->uiCurBits << iLen) | kuiValue;

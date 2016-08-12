@@ -3526,6 +3526,10 @@ int32_t WriteSsvcParaset (sWelsEncCtx* pCtx, const int32_t kiSpatialNum,
   return iReturn;
 }
 
+// RTI Change
+#ifdef _WIN32_WCE
+#pragma warning( disable : 4701 )
+#endif
 // writing parasets for simulcast avc
 int32_t WriteSavcParaset (sWelsEncCtx* pCtx, const int32_t kiSpatialNum,
                           SLayerBSInfo*& pLayerBsInfo, int32_t& iLayerNum, int32_t& iFrameSize) {

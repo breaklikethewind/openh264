@@ -175,6 +175,14 @@ void CWelsH264SVCEncoder::InitEncoder (void) {
     return;
   }
 
+// RTI Change
+#ifdef _WIN32_WCE
+#if defined(HAVE_NEON)
+    RETAILMSG(1,(L"%s[%i] OpenH264 Encoder: HAVE_NEON is set, 0x%08x\r\n", _T(__FILE__), __LINE__, WelsCPUFeatureDetect(NULL) ));
+#else
+	RETAILMSG(1,(L"%s[%i] OpenH264 Encoder: HAVE_NEON is clear, 0x%08x\r\n", _T(__FILE__), __LINE__, WelsCPUFeatureDetect(NULL) ));
+#endif
+#endif
   m_pWelsTrace->SetCodecInstance (this);
 }
 

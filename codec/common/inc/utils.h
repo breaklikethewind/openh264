@@ -94,4 +94,22 @@ float WelsCalcPsnr (const void* kpTarPic,
                     const int32_t kiHeight);
 
 
+// RTI Change
+#if defined(HAVE_NEON)
+
+// Make C++ compiler use 'C' linkage so the compiler does not mangle the
+// name of our assembly function
+#if defined(__cplusplus)
+extern "C" {
+#endif//__cplusplus
+// This is a simple function to test NEON. 
+void TestAsm_neon(unsigned int, unsigned int);
+#if defined(__cplusplus)
+}
+#endif//__cplusplus
+
+bool TestNeon(void);
+
+#endif
+// RTI Change; End
 #endif//WELS_UTILS_H__

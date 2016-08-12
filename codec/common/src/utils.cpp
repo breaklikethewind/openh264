@@ -136,3 +136,43 @@ float WelsCalcPsnr (const void* kpTarPic,
   return CALC_PSNR (kiWidth, kiHeight, iSqe);
 }
 
+// RTI Change; Added function
+#if defined(HAVE_NEON)
+/*****************************************************************************/
+/* This is a simple function to test NEON. The NEON assembly function        */
+/* TestAsm_neon(address, addval) will take the value of the first 32b word   */
+/* of memory, duplicate it to the next 3 DWORDS (4 DWORDS total memory), and */
+/* add the value of addval to all 4 DWORDS.                                  */
+/*****************************************************************************/
+bool TestNeon(void)
+{
+	DWORD* fourwords[4];
+	DWORD* pHWInput;
+	DWORD* pHWOutput;
+	bool result = true;
+	DWORD initialval = 0x04030201;
+	DWORD addval = 0x01010101;
+
+	// Start memory with a clean slate, so we are not fooled
+	memset(fourwords, 0x00, sizeof(fourwords));
+
+	// Prepare parameters & call neon assembly function
+//	RETAILMSG(1,(L"\r\n") );
+	pHWInput = (DWORD*)fourwords;
+	pHWInput[0] = initialval;
+	TestAsm_neon((unsigned int)pHWInput, (unsigned int)addval);
+//	RETAILMSG(1,(L"TestNEON(0x%08x, 0x%08x)\r\n", pHWInput, addval));
+
+	// Check to see if the neon assembly function did what we expect
+	// Expected result is 4 32 bit values of initialval + addval
+	for (pHWOutput = pHWInput; pHWOutput < (pHWInput + 4); pHWOutput++) {
+		if (*pHWOutput != (initialval + addval)) 
+			result = false;
+//		RETAILMSG(1,(L"pHWOutput 0x%08x : 0x%08x\r\n", (DWORD)pHWOutput, (DWORD)*pHWOutput));
+	}
+
+//	RETAILMSG(1,(L"\r\n") );
+
+	return result;
+}
+#endif

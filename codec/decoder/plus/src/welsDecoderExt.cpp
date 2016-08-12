@@ -706,6 +706,14 @@ long WelsCreateDecoder (ISVCDecoder** ppDecoder) {
   if (NULL == ppDecoder) {
     return ERR_INVALID_PARAMETERS;
   }
+// RTI Change
+#if defined(HAVE_NEON)
+	if (TestNeon())
+		RETAILMSG(1,(L"Test NEON: Success!\r\n"));
+	else
+		RETAILMSG(1,(L"\r\nTest NEON: Fail! Is the NEON powered up & out of reset???\r\n\r\n"));
+#endif
+// End RTI Change
 
   *ppDecoder = new CWelsDecoder();
 
