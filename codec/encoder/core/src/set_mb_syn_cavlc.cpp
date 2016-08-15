@@ -257,6 +257,12 @@ int32_t StashPopMBStatusCabac (SDynamicSlicingStack* pDss, SSlice* pSlice) {
   return pDss->iMbSkipRunStack;
 }
 
+int32_t GetBsPosCavlc(SSlice *pSlice){
+  return BsGetBitsPos (pSlice->pSliceBsa);
+}
+int32_t GetBsPosCabac(SSlice *pSlice){
+  return (int32_t) ((pSlice->sCabacCtx.m_pBufCur - pSlice->sCabacCtx.m_pBufStart) << 3) + (pSlice->sCabacCtx.m_iLowBitCnt - 9);
+}
 void WelsWriteSliceEndSyn (SSlice* pSlice, bool bEntropyCodingModeFlag) {
   SBitStringAux* pBs = pSlice->pSliceBsa;
   if (bEntropyCodingModeFlag) {
@@ -276,15 +282,22 @@ void InitCoeffFunc (SWelsFuncPtrList* pFuncList, const uint32_t uiCpuFlag, int32
     pFuncList->pfCavlcParamCal = CavlcParamCal_sse2;
   }
 #endif
+#ifdef X86_ASM
+  if (uiCpuFlag & WELS_CPU_SSE42) {
+    pFuncList->pfCavlcParamCal = CavlcParamCal_sse42;
+  }
+#endif
   if (iEntropyCodingModeFlag) {
     pFuncList->pfStashMBStatus = StashMBStatusCabac;
     pFuncList->pfStashPopMBStatus = StashPopMBStatusCabac;
     pFuncList->pfWelsSpatialWriteMbSyn = WelsSpatialWriteMbSynCabac;
+    pFuncList->pfGetBsPosition = GetBsPosCabac;
   } else {
     pFuncList->pfStashMBStatus = StashMBStatusCavlc;
     pFuncList->pfStashPopMBStatus = StashPopMBStatusCavlc;
     pFuncList->pfWelsSpatialWriteMbSyn = WelsSpatialWriteMbSyn;
 
+    pFuncList->pfGetBsPosition = GetBsPosCavlc;
   }
 }
 

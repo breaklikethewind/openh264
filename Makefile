@@ -33,8 +33,8 @@ GMP_API_BRANCH=Firefox39
 CCASFLAGS=$(CFLAGS)
 STATIC_LDFLAGS=-lstdc++
 
-VERSION=1.5
-SHAREDLIBVERSION=1
+VERSION=1.6
+SHAREDLIBVERSION=3
 
 ifeq (,$(wildcard $(SRC_PATH)gmp-api))
 HAVE_GMP_API=No
@@ -51,7 +51,14 @@ endif
 # Configurations
 ifeq ($(BUILDTYPE), Release)
 CFLAGS += $(CFLAGS_OPT)
+CFLAGS += -DNDEBUG
 USE_ASM = Yes
+ifeq ($(DEBUGSYMBOLS), True)
+CFLAGS += -g
+CXXFLAGS += -g
+DEBUGSYMBOLS_TAG := _debug_symbols
+PROCESS_FILES := True
+endif
 else
 CFLAGS += $(CFLAGS_DEBUG)
 USE_ASM = No
@@ -62,11 +69,17 @@ CFLAGS += -fsanitize=address
 LDFLAGS += -fsanitize=address
 endif
 
+STRIP_FLAGS := -S
+ifeq (linux, $((OS)))
+STRIP_FLAGS := -g
+endif
+
 # Make sure the all target is the first one
 all: libraries binaries
 
 include $(SRC_PATH)build/platform-$(OS).mk
 
+MODULE := $(LIBPREFIX)$(MODULE_NAME).$(SHAREDLIBSUFFIX)
 
 CFLAGS += -DGENERATED_VERSION_HEADER
 LDFLAGS +=
@@ -108,11 +121,11 @@ PROCESSING_INCLUDES += \
     -I$(SRC_PATH)codec/processing/src/vaacalc
 
 GTEST_INCLUDES += \
-    -I$(SRC_PATH)gtest \
-    -I$(SRC_PATH)gtest/include
+    -I$(SRC_PATH)gtest/googletest \
+    -I$(SRC_PATH)gtest/googletest/include
 
 CODEC_UNITTEST_INCLUDES += \
-    -I$(SRC_PATH)gtest/include \
+    -I$(SRC_PATH)gtest/googletest/include \
     -I$(SRC_PATH)codec/common/inc \
     -I$(SRC_PATH)test
 
@@ -154,14 +167,14 @@ clean:
 ifeq (android,$(OS))
 clean: clean_Android
 endif
-	$(QUIET)rm -f $(OBJS) $(OBJS:.$(OBJ)=.d) $(OBJS:.$(OBJ)=.obj) $(LIBRARIES) $(BINARIES) *.lib *.a *.dylib *.dll *.so *.exe *.pdb *.exp *.pc *.res
+	$(QUIET)rm -f $(OBJS) $(OBJS:.$(OBJ)=.d) $(OBJS:.$(OBJ)=.obj) $(LIBRARIES) $(BINARIES) *.lib *.a *.dylib *.dll *.so *.exe *.pdb *.exp *.pc *.res *.map
 
 gmp-bootstrap:
 	if [ ! -d gmp-api ] ; then git clone https://github.com/mozilla/gmp-api gmp-api ; fi
 	cd gmp-api && git fetch origin && git checkout $(GMP_API_BRANCH)
 
 gtest-bootstrap:
-	svn co https://googletest.googlecode.com/svn/trunk/ gtest
+	git clone https://github.com/google/googletest.git gtest
 
 ifeq ($(HAVE_GTEST),Yes)
 
@@ -215,18 +228,29 @@ LIBRARIES += $(LIBPREFIX)$(PROJECT_NAME).$(LIBSUFFIX) $(LIBPREFIX)$(PROJECT_NAME
 $(LIBPREFIX)$(PROJECT_NAME).$(LIBSUFFIX): $(ENCODER_OBJS) $(DECODER_OBJS) $(PROCESSING_OBJS) $(COMMON_OBJS)
 	$(QUIET)rm -f $@
 	$(QUIET_AR)$(AR) $(AR_OPTS) $+
+ifeq (True, $(PROCESS_FILES))
+	cp $@ $(LIBPREFIX)$(PROJECT_NAME)$(DEBUGSYMBOLS_TAG).$(LIBSUFFIX)
+	strip $(STRIP_FLAGS) $@ -o $@
+endif
 
 $(LIBPREFIX)$(PROJECT_NAME).$(SHAREDLIBSUFFIXVER): $(ENCODER_OBJS) $(DECODER_OBJS) $(PROCESSING_OBJS) $(COMMON_OBJS)
 	$(QUIET)rm -f $@
 	$(QUIET_CXX)$(CXX) $(SHARED) $(CXX_LINK_O) $+ $(LDFLAGS) $(SHLDFLAGS)
+ifeq (True, $(PROCESS_FILES))
+	cp $@ $(LIBPREFIX)$(PROJECT_NAME)$(DEBUGSYMBOLS_TAG).$(SHAREDLIBSUFFIXVER)
+	strip $(STRIP_FLAGS) $@ -o $@
+endif
 
 ifneq ($(SHAREDLIBSUFFIXVER),$(SHAREDLIBSUFFIX))
 $(LIBPREFIX)$(PROJECT_NAME).$(SHAREDLIBSUFFIX): $(LIBPREFIX)$(PROJECT_NAME).$(SHAREDLIBSUFFIXVER)
 	$(QUIET)ln -sfn $+ $@
+ifeq (True, $(PROCESS_FILES))
+	$(QUIET)ln -sfn $(LIBPREFIX)$(PROJECT_NAME)$(DEBUGSYMBOLS_TAG).$(SHAREDLIBSUFFIXVER) $(LIBPREFIX)$(PROJECT_NAME)$(DEBUGSYMBOLS_TAG).$(SHAREDLIBSUFFIX)
+endif
 endif
 
 ifeq ($(HAVE_GMP_API),Yes)
-plugin: $(LIBPREFIX)$(MODULE_NAME).$(SHAREDLIBSUFFIX)
+plugin: $(MODULE)
 LIBRARIES += $(LIBPREFIX)$(MODULE_NAME).$(SHAREDLIBSUFFIXVER)
 else
 plugin:
@@ -234,13 +258,23 @@ plugin:
 	@echo "You do not have gmp-api.  Run make gmp-bootstrap to get the gmp-api headers."
 endif
 
+echo-plugin-name:
+	@echo $(MODULE)
+
 $(LIBPREFIX)$(MODULE_NAME).$(SHAREDLIBSUFFIXVER): $(MODULE_OBJS) $(ENCODER_OBJS) $(DECODER_OBJS) $(PROCESSING_OBJS) $(COMMON_OBJS)
 	$(QUIET)rm -f $@
 	$(QUIET_CXX)$(CXX) $(SHARED) $(CXX_LINK_O) $+ $(LDFLAGS) $(SHLDFLAGS) $(MODULE_LDFLAGS)
+ifeq (True, $(PROCESS_FILES))
+	cp $@ $(LIBPREFIX)$(MODULE_NAME)$(DEBUGSYMBOLS_TAG).$(SHAREDLIBSUFFIXVER)
+	strip $(STRIP_FLAGS) $@ -o $@
+endif
 
 ifneq ($(SHAREDLIBSUFFIXVER),$(SHAREDLIBSUFFIX))
-$(LIBPREFIX)$(MODULE_NAME).$(SHAREDLIBSUFFIX): $(LIBPREFIX)$(MODULE_NAME).$(SHAREDLIBSUFFIXVER)
+$(MODULE): $(LIBPREFIX)$(MODULE_NAME).$(SHAREDLIBSUFFIXVER)
 	$(QUIET)ln -sfn $+ $@
+ifeq (True, $(PROCESS_FILES))
+	$(QUIET)ln -sfn $(LIBPREFIX)$(MODULE_NAME)$(DEBUGSYMBOLS_TAG).$(SHAREDLIBSUFFIXVER) $(LIBPREFIX)$(MODULE_NAME)$(DEBUGSYMBOLS_TAG).$(SHAREDLIBSUFFIX)
+endif
 endif
 
 $(PROJECT_NAME).pc: $(PROJECT_NAME).pc.in

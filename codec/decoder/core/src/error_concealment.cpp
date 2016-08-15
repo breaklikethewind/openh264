@@ -250,7 +250,7 @@ void DoMbECMvCopy (PWelsDecoderContext pCtx, PPicture pDec, PPicture pRef, int32
     iMVs[1] = iFullMVy - (iMbYInPix << 2);
     BaseMC (pMCRefMem, iMbXInPix, iMbYInPix, &pCtx->sMcFunc, 16, 16, iMVs);
   }
-  return ;
+  return;
 }
 
 void GetAvilInfoFromCorrectMb (PWelsDecoderContext pCtx) {

@@ -71,6 +71,7 @@
 
 #ifdef WINAPI_FAMILY
 #if !WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP)
+#define WP80
 using namespace Platform;
 using namespace Windows::Foundation;
 using namespace Windows::System::Threading;
@@ -174,6 +175,30 @@ WELS_THREAD_ERROR_CODE    WelsEventClose (WELS_EVENT* event, const char* event_n
   return WELS_THREAD_ERROR_OK;
 }
 
+#ifndef WP80
+void WelsSleep (uint32_t dwMilliSecond) {
+  ::Sleep (dwMilliSecond);
+}
+#else
+void WelsSleep (uint32_t dwMilliSecond) {
+  static WELS_EVENT hSleepEvent = NULL;
+  if (!hSleepEvent) {
+    WELS_EVENT hLocalSleepEvent = NULL;
+    WELS_THREAD_ERROR_CODE ret = WelsEventOpen (&hLocalSleepEvent);
+    if (WELS_THREAD_ERROR_OK != ret) {
+      return;
+    }
+    WELS_EVENT hPreviousEvent = InterlockedCompareExchangePointerRelease (&hSleepEvent, hLocalSleepEvent, NULL);
+    if (hPreviousEvent) {
+      WelsEventClose (&hLocalSleepEvent);
+    }
+    //On this singleton usage idea of using InterlockedCompareExchangePointerRelease:
+    //   similar idea of can be found at msdn blog when introducing InterlockedCompareExchangePointerRelease
+  }
+
+  WaitForSingleObject (hSleepEvent, dwMilliSecond);
+}
+#endif
 
 WELS_THREAD_ERROR_CODE    WelsThreadCreate (WELS_THREAD_HANDLE* thread,  LPWELS_THREAD_ROUTINE  routine,
     void* arg, WELS_THREAD_ATTR attr) {
@@ -224,7 +249,7 @@ WELS_THREAD_ERROR_CODE    WelsQueryLogicalProcessInfo (WelsLogicalProcessInfo* p
   return WELS_THREAD_ERROR_OK;
 }
 
-#else
+#else //platform: #ifdef _WIN32
 
 WELS_THREAD_ERROR_CODE    WelsThreadCreate (WELS_THREAD_HANDLE* thread,  LPWELS_THREAD_ROUTINE  routine,
     void* arg, WELS_THREAD_ATTR attr) {
@@ -272,14 +297,21 @@ WELS_THREAD_HANDLE        WelsThreadSelf() {
 
 WELS_THREAD_ERROR_CODE    WelsEventOpen (WELS_EVENT* p_event, const char* event_name) {
 #ifdef __APPLE__
-  if (p_event == NULL || event_name == NULL)
+  if (p_event == NULL) {
     return WELS_THREAD_ERROR_GENERAL;
+  }
+  char    strSuffix[100] = { 0 };
+  if (NULL == event_name) {
+    sprintf (strSuffix, "WelsSem%ld_p%ld", (intptr_t)p_event, (long) (getpid()));
+    event_name = &strSuffix[0];
+  }
   *p_event = sem_open (event_name, O_CREAT, (S_IRUSR | S_IWUSR)/*0600*/, 0);
   if (*p_event == (sem_t*)SEM_FAILED) {
     sem_unlink (event_name);
     *p_event = NULL;
     return WELS_THREAD_ERROR_GENERAL;
   } else {
+    //printf("event_open:%x, %s\n", p_event, event_name);
     return WELS_THREAD_ERROR_OK;
   }
 #else
@@ -296,6 +328,7 @@ WELS_THREAD_ERROR_CODE    WelsEventOpen (WELS_EVENT* p_event, const char* event_
 #endif
 }
 WELS_THREAD_ERROR_CODE    WelsEventClose (WELS_EVENT* event, const char* event_name) {
+  //printf("event_close:%x, %s\n", event, event_name);
 #ifdef __APPLE__
   WELS_THREAD_ERROR_CODE err = sem_close (*event); // match with sem_open
   if (event_name)
@@ -308,6 +341,9 @@ WELS_THREAD_ERROR_CODE    WelsEventClose (WELS_EVENT* event, const char* event_n
 #endif
 }
 
+void WelsSleep (uint32_t dwMilliSecond) {
+  usleep (dwMilliSecond * 1000);
+}
 WELS_THREAD_ERROR_CODE   WelsEventSignal (WELS_EVENT* event) {
   WELS_THREAD_ERROR_CODE err = 0;
 //  int32_t val = 0;
@@ -319,7 +355,7 @@ WELS_THREAD_ERROR_CODE   WelsEventSignal (WELS_EVENT* event) {
   return err;
 }
 
-WELS_THREAD_ERROR_CODE   WelsEventWait (WELS_EVENT* event) {
+WELS_THREAD_ERROR_CODE WelsEventWait (WELS_EVENT* event) {
   return sem_wait (*event); // blocking until signaled
 }
 

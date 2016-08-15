@@ -527,12 +527,12 @@ int32_t CheckIntra16x16PredMode (uint8_t uiSampleAvail, int8_t* pMode) {
   int32_t iTopAvail      = uiSampleAvail & 0x01;
 
   if ((*pMode < 0) || (*pMode > MAX_PRED_MODE_ID_I16x16)) {
-    return ERR_INFO_INVALID_I16x16_PRED_MODE;
+    return GENERATE_ERROR_NO (ERR_LEVEL_MB_DATA, ERR_INFO_INVALID_I16x16_PRED_MODE);
   }
 
   if (I16_PRED_DC == *pMode) {
     if (iLeftAvail && iTopAvail) {
-      return 0;
+      return ERR_NONE;
     } else if (iLeftAvail) {
       *pMode = I16_PRED_DC_L;
     } else if (iTopAvail) {
@@ -543,10 +543,10 @@ int32_t CheckIntra16x16PredMode (uint8_t uiSampleAvail, int8_t* pMode) {
   } else {
     bool bModeAvail = CHECK_I16_MODE (*pMode, iLeftAvail, iTopAvail, bLeftTopAvail);
     if (0 == bModeAvail) {
-      return ERR_INFO_INVALID_I16x16_PRED_MODE;
+      return GENERATE_ERROR_NO (ERR_LEVEL_MB_DATA, ERR_INFO_INVALID_I16x16_PRED_MODE);
     }
   }
-  return 0;
+  return ERR_NONE;
 }
 
 
@@ -557,7 +557,7 @@ int32_t CheckIntraChromaPredMode (uint8_t uiSampleAvail, int8_t* pMode) {
 
   if (C_PRED_DC == *pMode) {
     if (iLeftAvail && iTopAvail) {
-      return 0;
+      return ERR_NONE;
     } else if (iLeftAvail) {
       *pMode = C_PRED_DC_L;
     } else if (iTopAvail) {
@@ -568,10 +568,10 @@ int32_t CheckIntraChromaPredMode (uint8_t uiSampleAvail, int8_t* pMode) {
   } else {
     bool bModeAvail = CHECK_CHROMA_MODE (*pMode, iLeftAvail, iTopAvail, bLeftTopAvail);
     if (0 == bModeAvail) {
-      return ERR_INFO_INVALID_I_CHROMA_PRED_MODE;
+      return GENERATE_ERROR_NO (ERR_LEVEL_MB_DATA, ERR_INFO_INVALID_I_CHROMA_PRED_MODE);
     }
   }
-  return 0;
+  return ERR_NONE;
 }
 
 int32_t CheckIntraNxNPredMode (int32_t* pSampleAvail, int8_t* pMode, int32_t iIndex, bool b8x8) {
@@ -584,7 +584,7 @@ int32_t CheckIntraNxNPredMode (int32_t* pSampleAvail, int8_t* pMode, int32_t iIn
   int8_t iFinalMode;
 
   if ((*pMode < 0) || (*pMode > MAX_PRED_MODE_ID_I4x4)) {
-    return ERR_INVALID_INTRA4X4_MODE;
+    return GENERATE_ERROR_NO (ERR_LEVEL_MB_DATA, ERR_INVALID_INTRA4X4_MODE);
   }
 
   if (I4_PRED_DC == *pMode) {
@@ -600,7 +600,7 @@ int32_t CheckIntraNxNPredMode (int32_t* pSampleAvail, int8_t* pMode, int32_t iIn
   } else {
     bool bModeAvail = CHECK_I4_MODE (*pMode, iLeftAvail, iTopAvail, bLeftTopAvail);
     if (0 == bModeAvail) {
-      return ERR_INVALID_INTRA4X4_MODE;
+      return GENERATE_ERROR_NO (ERR_LEVEL_MB_DATA, ERR_INVALID_INTRA4X4_MODE);
     }
 
     iFinalMode = *pMode;
@@ -858,13 +858,13 @@ int32_t WelsResidualBlockCavlc (SVlcTable* pVlcTable, uint8_t* pNonZeroCountCach
   }
   if (0 == uiTotalCoeff) {
     pBs->iIndex += iUsedBits;
-    return 0;
+    return ERR_NONE;
   }
   if ((uiTrailingOnes > 3) || (uiTotalCoeff > 16)) { /////////////////check uiTrailingOnes and uiTotalCoeff
-    return ERR_INFO_CAVLC_INVALID_TOTAL_COEFF_OR_TRAILING_ONES;
+    return GENERATE_ERROR_NO (ERR_LEVEL_MB_DATA, ERR_INFO_CAVLC_INVALID_TOTAL_COEFF_OR_TRAILING_ONES);
   }
   if ((i = CavlcGetLevelVal (iLevel, &sReadBitsCache, uiTotalCoeff, uiTrailingOnes)) == -1) {
-    return ERR_INFO_CAVLC_INVALID_LEVEL;
+    return GENERATE_ERROR_NO (ERR_LEVEL_MB_DATA, ERR_INFO_CAVLC_INVALID_LEVEL);
   }
   iUsedBits += i;
   if (uiTotalCoeff < iMaxNumCoeff) {
@@ -874,10 +874,10 @@ int32_t WelsResidualBlockCavlc (SVlcTable* pVlcTable, uint8_t* pNonZeroCountCach
   }
 
   if ((iZerosLeft < 0) || ((iZerosLeft + uiTotalCoeff) > iMaxNumCoeff)) {
-    return ERR_INFO_CAVLC_INVALID_ZERO_LEFT;
+    return GENERATE_ERROR_NO (ERR_LEVEL_MB_DATA, ERR_INFO_CAVLC_INVALID_ZERO_LEFT);
   }
   if ((i = CavlcGetRunBefore (iRun, &sReadBitsCache, uiTotalCoeff, pVlcTable, iZerosLeft)) == -1) {
-    return ERR_INFO_CAVLC_INVALID_RUN_BEFORE;
+    return GENERATE_ERROR_NO (ERR_LEVEL_MB_DATA, ERR_INFO_CAVLC_INVALID_RUN_BEFORE);
   }
   iUsedBits += i;
   pBs->iIndex += iUsedBits;
@@ -908,7 +908,7 @@ int32_t WelsResidualBlockCavlc (SVlcTable* pVlcTable, uint8_t* pNonZeroCountCach
     }
   }
 
-  return 0;
+  return ERR_NONE;
 }
 
 int32_t WelsResidualBlockCavlc8x8 (SVlcTable* pVlcTable, uint8_t* pNonZeroCountCache, PBitStringAux pBs, int32_t iIndex,
@@ -961,13 +961,13 @@ int32_t WelsResidualBlockCavlc8x8 (SVlcTable* pVlcTable, uint8_t* pNonZeroCountC
   }
   if (0 == uiTotalCoeff) {
     pBs->iIndex += iUsedBits;
-    return 0;
+    return ERR_NONE;
   }
   if ((uiTrailingOnes > 3) || (uiTotalCoeff > 16)) { /////////////////check uiTrailingOnes and uiTotalCoeff
-    return ERR_INFO_CAVLC_INVALID_TOTAL_COEFF_OR_TRAILING_ONES;
+    return GENERATE_ERROR_NO (ERR_LEVEL_MB_DATA, ERR_INFO_CAVLC_INVALID_TOTAL_COEFF_OR_TRAILING_ONES);
   }
   if ((i = CavlcGetLevelVal (iLevel, &sReadBitsCache, uiTotalCoeff, uiTrailingOnes)) == -1) {
-    return ERR_INFO_CAVLC_INVALID_LEVEL;
+    return GENERATE_ERROR_NO (ERR_LEVEL_MB_DATA, ERR_INFO_CAVLC_INVALID_LEVEL);
   }
   iUsedBits += i;
   if (uiTotalCoeff < iMaxNumCoeff) {
@@ -977,10 +977,10 @@ int32_t WelsResidualBlockCavlc8x8 (SVlcTable* pVlcTable, uint8_t* pNonZeroCountC
   }
 
   if ((iZerosLeft < 0) || ((iZerosLeft + uiTotalCoeff) > iMaxNumCoeff)) {
-    return ERR_INFO_CAVLC_INVALID_ZERO_LEFT;
+    return GENERATE_ERROR_NO (ERR_LEVEL_MB_DATA, ERR_INFO_CAVLC_INVALID_ZERO_LEFT);
   }
   if ((i = CavlcGetRunBefore (iRun, &sReadBitsCache, uiTotalCoeff, pVlcTable, iZerosLeft)) == -1) {
-    return ERR_INFO_CAVLC_INVALID_RUN_BEFORE;
+    return GENERATE_ERROR_NO (ERR_LEVEL_MB_DATA, ERR_INFO_CAVLC_INVALID_RUN_BEFORE);
   }
   iUsedBits += i;
   pBs->iIndex += iUsedBits;
@@ -995,7 +995,7 @@ int32_t WelsResidualBlockCavlc8x8 (SVlcTable* pVlcTable, uint8_t* pNonZeroCountC
                  : ((iLevel[i] * kpDequantCoeff[j] + (1 << (5 - uiQp / 6))) >> (6 - uiQp / 6));
   }
 
-  return 0;
+  return ERR_NONE;
 }
 
 int32_t ParseInterInfo (PWelsDecoderContext pCtx, int16_t iMvArray[LIST_A][30][MV_A], int8_t iRefIdxArray[LIST_A][30],
@@ -1036,7 +1036,7 @@ int32_t ParseInterInfo (PWelsDecoderContext pCtx, int16_t iMvArray[LIST_A][30][M
           iRefIdx = 0;
           pCtx->iErrorCode |= dsBitstreamError;
         } else {
-          return ERR_INFO_INVALID_REF_INDEX;
+          return GENERATE_ERROR_NO (ERR_LEVEL_MB_DATA, ERR_INFO_INVALID_REF_INDEX);
         }
       }
       pCtx->bMbRefConcealed = pCtx->bRPLRError || pCtx->bMbRefConcealed || ! (ppRefPic[iRefIdx]
@@ -1077,7 +1077,7 @@ int32_t ParseInterInfo (PWelsDecoderContext pCtx, int16_t iMvArray[LIST_A][30][M
           iRefIdx[i] = 0;
           pCtx->iErrorCode |= dsBitstreamError;
         } else {
-          return ERR_INFO_INVALID_REF_INDEX;
+          return GENERATE_ERROR_NO (ERR_LEVEL_MB_DATA, ERR_INFO_INVALID_REF_INDEX);
         }
       }
       pCtx->bMbRefConcealed = pCtx->bRPLRError || pCtx->bMbRefConcealed || ! (ppRefPic[iRefIdx[i]]
@@ -1114,7 +1114,7 @@ int32_t ParseInterInfo (PWelsDecoderContext pCtx, int16_t iMvArray[LIST_A][30][M
             iRefIdx[i] = 0;
             pCtx->iErrorCode |= dsBitstreamError;
           } else {
-            return ERR_INFO_INVALID_REF_INDEX;
+            return GENERATE_ERROR_NO (ERR_LEVEL_MB_DATA, ERR_INFO_INVALID_REF_INDEX);
           }
         }
         pCtx->bMbRefConcealed = pCtx->bRPLRError || pCtx->bMbRefConcealed || ! (ppRefPic[iRefIdx[i]]
@@ -1152,7 +1152,7 @@ int32_t ParseInterInfo (PWelsDecoderContext pCtx, int16_t iMvArray[LIST_A][30][M
       WELS_READ_VERIFY (BsGetUe (pBs, &uiCode)); //sub_mb_type[ mbPartIdx ]
       uiSubMbType = uiCode;
       if (uiSubMbType >= 4) { //invalid uiSubMbType
-        return ERR_INFO_INVALID_SUB_MB_TYPE;
+        return GENERATE_ERROR_NO (ERR_LEVEL_MB_DATA, ERR_INFO_INVALID_SUB_MB_TYPE);
       }
       pCurDqLayer->pSubMbType[iMbXy][i] = g_ksInterSubMbTypeInfo[uiSubMbType].iType;
       iSubPartCount[i] = g_ksInterSubMbTypeInfo[uiSubMbType].iPartCount;
@@ -1185,7 +1185,7 @@ int32_t ParseInterInfo (PWelsDecoderContext pCtx, int16_t iMvArray[LIST_A][30][M
               iRefIdx[i] = 0;
               pCtx->iErrorCode |= dsBitstreamError;
             } else {
-              return ERR_INFO_INVALID_REF_INDEX;
+              return GENERATE_ERROR_NO (ERR_LEVEL_MB_DATA, ERR_INFO_INVALID_REF_INDEX);
             }
           }
           pCtx->bMbRefConcealed = pCtx->bRPLRError || pCtx->bMbRefConcealed || ! (ppRefPic[iRefIdx[i]]
@@ -1254,7 +1254,7 @@ int32_t ParseInterInfo (PWelsDecoderContext pCtx, int16_t iMvArray[LIST_A][30][M
     break;
   }
 
-  return 0;
+  return ERR_NONE;
 }
 
 } // namespace WelsDec

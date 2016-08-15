@@ -521,11 +521,24 @@ void WelsInitEncodingFuncs (SWelsFuncPtrList* pFuncList, uint32_t  uiCpuFlag) {
     pFuncList->pfScan4x4Ac              = WelsScan4x4Ac_sse2;
     pFuncList->pfCalculateSingleCtr4x4  = WelsCalculateSingleCtr4x4_sse2;
 
+    pFuncList->pfDctT4                  = WelsDctT4_sse2;
     pFuncList->pfDctFourT4              = WelsDctFourT4_sse2;
   }
 //#ifndef MACOS
   if (uiCpuFlag & WELS_CPU_SSSE3) {
     pFuncList->pfScan4x4                = WelsScan4x4DcAc_ssse3;
+  }
+  if (uiCpuFlag & WELS_CPU_SSE42) {
+    pFuncList->pfGetNoneZeroCount       = WelsGetNoneZeroCount_sse42;
+  }
+  if (uiCpuFlag & WELS_CPU_AVX2) {
+    pFuncList->pfDctT4                  = WelsDctT4_avx2;
+    pFuncList->pfDctFourT4              = WelsDctFourT4_avx2;
+
+    pFuncList->pfQuantization4x4        = WelsQuant4x4_avx2;
+    pFuncList->pfQuantizationDc4x4      = WelsQuant4x4Dc_avx2;
+    pFuncList->pfQuantizationFour4x4    = WelsQuantFour4x4_avx2;
+    pFuncList->pfQuantizationFour4x4Max = WelsQuantFour4x4Max_avx2;
   }
 
 //#endif//MACOS
